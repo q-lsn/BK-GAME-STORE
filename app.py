@@ -12,9 +12,9 @@ USE_WINDOWS_AUTHENTICATION = False
 # SETUP
 # Replace with your database information
 if USE_WINDOWS_AUTHENTICATION:
-    db_config = 'DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=STEAM_PROJECT;Trusted_Connection=yes'
+    db_config = 'DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=TEST;Trusted_Connection=yes'
 else:
-    db_config = 'DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=STEAM_PROJECT;UID=sa;PWD=270205'
+    db_config = 'DRIVER={ODBC Driver 18 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=TEST;UID=sa;PWD=270205'
 
 
 def get_db_connection():
@@ -125,3 +125,181 @@ def add_data():
             return render_template('form.html', item=request.form)
     
     return render_template('form.html')
+
+
+
+
+
+
+
+##########################################################################
+##########################################################################
+##########################################################################
+
+
+@app.route('/data', methods=['GET'])
+def list_data():
+    conn = get_db_connection()
+    data = []
+    search_query = request.args.get('search', '')
+    sort_by = request.args.get('sort_by', 'username')
+
+    if conn:
+        cursor = conn.cursor()
+        try:
+            # Gọi thủ tục lưu trữ hoặc thực hiện truy vấn
+            # ... (phần mã lấy dữ liệu từ CSDL) ...
+             cursor.execute("{CALL GetUsersFilteredSorted(?, ?)}", (search_query, sort_by))
+             data = cursor.fetchall()
+
+
+        except pyodbc.Error as err:
+            print(f"Error executing query/stored procedure: {err}")
+            flash('Could not retrieve data.', 'danger')
+        finally:
+            if cursor: cursor.close()
+            if conn: conn.close()
+    else:
+         flash('Could not connect to the database.', 'error')
+
+    # Render template index.html (trang hiển thị bảng dữ liệu)
+    return render_template('index.html', data=data, search_query=search_query, sort_by=sort_by)
+
+
+##########################################################################
+##########################################################################
+##########################################################################
+
+
+@app.route('/edit/<int:item_id>', methods=['GET', 'POST'])
+def edit_data(item_id):
+    conn = get_db_connection()
+    item = None # Biến để lưu dữ liệu của bản ghi cần sửa
+
+    if conn:
+        cursor = conn.cursor()
+        try:
+            # Lấy dữ liệu của bản ghi cần sửa dựa vào ID
+            # Thay thế 'USER' và 'user_id' bằng tên bảng và tên cột ID của bạn
+            sql_select = "SELECT user_id, username, password, email FROM [dbo].[USER] WHERE user_id = ?"
+            cursor.execute(sql_select, (item_id,))
+            item = cursor.fetchone() # Lấy một hàng duy nhất
+
+            if item:
+                 # Chuyển đổi tuple sang dictionary để dễ truy cập trong template
+                column_names = [column[0] for column in cursor.description]
+                item_dict = dict(zip(column_names, item))
+            else:
+                flash(f'Item with id {item_id} not found.', 'warning')
+                return redirect(url_for('index'))
+
+
+        except pyodbc.Error as err:
+            print(f"Error fetching data for edit: {err}")
+            flash('Could not load data for editing.', 'danger')
+            return redirect(url_for('index'))
+        finally:
+            cursor.close()
+            # Giữ kết nối mở nếu method là POST để xử lý update
+
+    else:
+        flash('Could not connect to the database.', 'error')
+        return redirect(url_for('index'))
+
+
+    if request.method == 'POST':
+        # Lấy dữ liệu từ form đã sửa
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        # Lấy các trường dữ liệu khác
+
+        # TODO: Validate dữ liệu nhập vào ở đây
+        if not username or not password or not email:
+            flash('Username, password, and email are required fields.', 'warning')
+            # Giữ lại dữ liệu người dùng đã nhập và render lại form
+            return render_template('form.html', item=request.form)
+
+
+        conn = get_db_connection() # Lấy lại kết nối cho POST request
+        if conn:
+            cursor = conn.cursor()
+            try:
+                # Câu lệnh UPDATE (Thay thế 'USER', tên các cột và 'user_id')
+                sql_update = "UPDATE [dbo].[USER] SET username = ?, password = ?, email = ? WHERE user_id = ?"
+                val_update = (username, password, email, item_id) # Đặt dữ liệu vào tuple
+
+                cursor.execute(sql_update, val_update)
+                conn.commit() # Xác nhận thay đổi
+
+                flash('Data updated successfully!', 'success')
+                return redirect(url_for('index'))
+
+            except pyodbc.IntegrityError as err:
+                # Xử lý lỗi khi có ràng buộc toàn vẹn (ví dụ: username hoặc email bị trùng)
+                print(f"Integrity error updating data: {err}")
+                flash('Username or email already exists.', 'danger')
+                conn.rollback() # Hoàn tác thay đổi
+                 # Giữ lại dữ liệu người dùng đã nhập
+                return render_template('form.html', item=request.form)
+
+            except pyodbc.Error as err:
+                print(f"Error updating data: {err}")
+                flash('An error occurred while updating data.', 'danger')
+                conn.rollback() # Hoàn tác thay đổi
+            finally:
+                cursor.close()
+                conn.close()
+        else:
+            flash('Could not connect to the database.', 'error')
+            return render_template('form.html', item=request.form)
+
+
+    # Nếu yêu cầu là GET và tìm thấy dữ liệu, hiển thị form với dữ liệu hiện có
+    # item_dict đã được tạo ở phần xử lý GET
+    return render_template('form.html', item=item_dict)
+
+######################################
+######################################
+######################################
+
+@app.route('/delete/<int:item_id>')
+def delete_data(item_id):
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        try:
+            # Câu lệnh DELETE (Thay thế 'USER' và 'user_id')
+            sql = "DELETE FROM [dbo].[USER] WHERE user_id = ?"
+            cursor.execute(sql, (item_id,))
+            conn.commit()
+
+            # TODO: Xử lý trường hợp bản ghi không tồn tại khi xóa
+            if cursor.rowcount == 0:
+                 flash(f'Item with id {item_id} not found.', 'warning')
+            else:
+                flash('Data deleted successfully!', 'success')
+
+        except pyodbc.IntegrityError as err:
+            # Xử lý lỗi khi cố gắng xóa bản ghi đang được tham chiếu bởi khóa ngoại ở bảng khác
+            print(f"Integrity error deleting data: {err}")
+            flash('Cannot delete this item because it is referenced by other data.', 'danger')
+            conn.rollback() # Hoàn tác thay đổi
+
+        except pyodbc.Error as err:
+            print(f"Error deleting data: {err}")
+            flash('An error occurred while deleting data.', 'danger')
+            conn.rollback() # Hoàn tác thay đổi
+        finally:
+            cursor.close()
+            conn.close()
+    else:
+        flash('Could not connect to the database.', 'error')
+
+    return redirect(url_for('index'))
+#####################################
+#####################################
+#####################################
+
+if __name__ == '__main__':
+    app.run(debug=True)
