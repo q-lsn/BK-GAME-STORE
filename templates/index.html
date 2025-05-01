@@ -1,23 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <title>Quản lý người dùng</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Game - Hệ Cơ Sở Dữ Liệu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* --- Các style chung cho các trang (có thể di chuyển sang style.css) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a202a; /* Nền màu tối */
+            color: #e0e0e0; /* Màu chữ sáng */
+            margin: 0;
+            padding: 20px; /* Thêm padding cho body */
+            line-height: 1.6; /* Tăng khoảng cách dòng */
+        }
+
+         h1, h2, h3 {
+             color: #1a9fd9; /* Màu xanh Steam cho tiêu đề */
+         }
+
+         a {
+             color: #1a9fd9; /* Màu xanh Steam cho link */
+             text-decoration: none;
+         }
+         a:hover {
+             text-decoration: underline;
+         }
+
+        /* Style cho flash messages */
+        .flashes {
+             list-style: none;
+             padding: 0;
+             margin: 10px auto; /* Căn giữa */
+             max-width: 1200px; /* Giới hạn chiều rộng */
+             text-align: center;
+        }
+
+        .flashes li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            opacity: 1; /* Mặc định hiển thị rõ */
+            transition: opacity 0.5s ease; /* Hiệu ứng mờ dần */
+        }
+         /* Class cho thông báo mờ dần */
+        .flashes li.fade-out {
+             opacity: 0;
+         }
+
+        .success {
+            background-color: #28a745; /* Xanh lá */
+            color: white;
+        }
+
+        .warning {
+            background-color: #ffc107; /* Vàng */
+            color: #333;
+        }
+
+        .danger {
+            background-color: #dc3545; /* Đỏ */
+            color: white;
+        }
+
+
+        /* --- Các style cụ thể cho index.html (Danh sách Game) --- */
+        .header-container {
+            max-width: 1200px; /* Giới hạn chiều rộng nội dung */
+            margin: 0 auto 30px auto; /* Căn giữa và thêm khoảng cách dưới */
+            text-align: center;
+        }
+
+         .controls-container {
+             max-width: 1200px;
+             margin: 0 auto 20px auto;
+             background-color: #2d3b45; /* Nền tối hơn */
+             padding: 15px;
+             border-radius: 5px;
+             display: flex; /* Sử dụng flexbox cho các control */
+             gap: 15px; /* Khoảng cách giữa các item */
+             flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
+             align-items: center;
+             justify-content: space-between; /* Căn đều các item */
+         }
+
+         .controls-container form {
+             display: flex; /* Sử dụng flexbox cho form tìm kiếm/sắp xếp */
+             gap: 10px; /* Khoảng cách giữa các input/select/button */
+             flex-wrap: wrap; /* Cho phép xuống dòng trong form */
+             flex-grow: 1; /* Cho phép form giãn nở */
+             align-items: center;
+         }
+
+         .controls-container input[type="text"],
+         .controls-container select {
+             padding: 8px;
+             border: 1px solid #555;
+             border-radius: 4px;
+             background-color: #3a4752; /* Nền tối cho input */
+             color: #e0e0e0; /* Chữ sáng */
+             font-size: 1em;
+         }
+
+         .controls-container button {
+             padding: 8px 15px;
+             background: linear-gradient(to bottom, #41a7e8, #1a9fd9); /* Màu gradient xanh Steam */
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+             font-size: 1em;
+         }
+          .controls-container button:hover {
+             background: linear-gradient(to bottom, #1a9fd9, #41a7e8); /* Đảo gradient khi hover */
+         }
+
+         /* Style cho nút "Thêm Game Mới" trong controls */
+         .controls-container .button-link {
+             display: inline-block;
+             padding: 8px 15px;
+             background: linear-gradient(to bottom, #28a745, #218838); /* Màu xanh lá */
+             color: white;
+             border: none;
+             border-radius: 4px;
+             text-decoration: none;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+             font-size: 1em;
+         }
+         .controls-container .button-link:hover {
+             background: linear-gradient(to bottom, #218838, #28a745);
+         }
+
+
+        .game-list-grid {
+            display: grid; /* Sử dụng Grid Layout */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Tạo lưới cột tự động, mỗi cột rộng tối thiểu 250px */
+            gap: 20px; /* Khoảng cách giữa các thẻ game */
+            max-width: 1200px; /* Giới hạn chiều rộng lưới */
+            margin: 0 auto; /* Căn giữa lưới */
+            padding: 0;
+            list-style: none; /* Xóa dấu đầu dòng */
+        }
+
+        .game-card {
+            background-color: #2d3b45; /* Nền tối hơn cho thẻ */
+            border-radius: 8px;
+            overflow: hidden; /* Cắt nội dung tràn */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover */
+            color: #e0e0e0; /* Màu chữ sáng */
+            display: flex; /* Sử dụng flexbox cho nội dung card */
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px); /* Nâng nhẹ thẻ khi hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Đổ bóng đậm hơn khi hover */
+        }
+
+        .game-card img {
+            width: 100%; /* Ảnh nền/cover chiếm toàn bộ chiều rộng thẻ */
+            height: 150px; /* Chiều cao cố định cho ảnh (tùy chỉnh) */
+            object-fit: cover; /* Đảm bảo ảnh không bị méo */
+        }
+
+        .card-content {
+            padding: 15px;
+            flex-grow: 1; /* Cho phép nội dung giãn nở để thẻ có chiều cao bằng nhau */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-content h3 {
+            margin-top: 0;
+            color: #1a9fd9; /* Màu xanh cho tên game */
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .card-content p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #b0b0b0; /* Màu xám nhạt cho thông tin phụ */
+        }
+
+         .card-actions {
+            padding: 15px;
+            border-top: 1px solid #3a4752; /* Đường kẻ phân cách */
+            background-color: #3a4752; /* Nền tối hơn cho phần action */
+            display: flex;
+            justify-content: space-around; /* Căn đều các nút */
+         }
+
+        .card-actions a {
+            color: #1a9fd9; /* Màu xanh cho link action */
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s ease; /* Hiệu ứng chuyển màu */
+        }
+
+        .card-actions a:hover {
+            color: #41a7e8; /* Màu xanh nhạt hơn khi hover */
+             text-decoration: underline;
+        }
+
+
+        /* --- Style cho Modal (Áp dụng cho cả hai modal: #addGameModal, #editGameModal) --- */
+        .modal {
+            display: none; /* Mặc định ẩn modal */
+            position: fixed; /* Giữ cố định trên toàn màn hình */
+            z-index: 1000; /* Đảm bảo modal hiển thị trên các nội dung khác */
+            left: 0;
+            top: 0;
+            width: 100%; /* Chiều rộng toàn màn hình */
+            height: 100%; /* Chiều cao toàn màn hình */
+            overflow: auto; /* Cho phép cuộn nếu nội dung quá dài */
+            background-color: rgba(0, 0, 0, 0.6); /* Lớp nền mờ màu đen */
+            /* Thêm các thuộc tính cho hiệu ứng mờ dần */
+            opacity: 0; /* Bắt đầu với độ trong suốt bằng 0 */
+            transition: opacity 0.3s ease; /* Hiệu ứng chuyển đổi độ trong suốt trong 0.3 giây */
+            pointer-events: none; /* Ngăn chặn tương tác chuột khi ẩn */
+        }
+
+        /* Định nghĩa trạng thái khi modal hiển thị */
+        .modal.show {
+            opacity: 1; /* Hiện rõ hoàn toàn */
+            pointer-events: auto; /* Cho phép tương tác chuột khi hiển thị */
+        }
+
+        .modal-content {
+            background-color: #2d3b45; /* Nền của nội dung modal (tông màu Steam) */
+            margin: 5% auto; /* Căn giữa theo chiều dọc và thêm margin trên dưới */
+            padding: 20px;
+            border: 1px solid #555;
+            border-radius: 8px;
+            width: 80%; /* Chiều rộng của nội dung modal */
+            max-width: 500px; /* Chiều rộng tối đa */
+            position: relative; /* Quan trọng cho nút đóng */
+            color: #e0e0e0; /* Màu chữ sáng */
+            /* Tùy chọn: Thêm hiệu ứng trượt nhẹ khi hiện/ẩn */
+            transform: translateY(-50px); /* Bắt đầu từ vị trí hơi cao hơn */
+            transition: transform 0.3s ease; /* Hiệu ứng chuyển đổi vị trí */
+        }
+
+        /* Khi modal có class 'show', áp dụng transform cho modal-content */
+        .modal.show .modal-content {
+            transform: translateY(0); /* Di chuyển về vị trí ban đầu */
+        }
+
+
+        .modal-content h2 {
+            margin-top: 0;
+            color: #1a9fd9; /* Màu xanh Steam cho tiêu đề modal */
+            margin-bottom: 20px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right; /* Đặt nút đóng ở góc trên bên phải */
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute; /* Định vị tuyệt đối so với modal-content */
+            top: 10px;
+            right: 15px;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #e0e0e0;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Style cho các input và textarea trong form modal */
+        .modal-content form input[type="text"],
+        .modal-content form input[type="date"],
+        .modal-content form textarea {
+            width: calc(100% - 22px); /* Chiếm gần hết chiều rộng, trừ padding và border */
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #3a4752; /* Nền tối cho input */
+            color: #e0e0e0; /* Chữ sáng */
+            font-size: 1em;
+        }
+
+        .modal-content form button[type="submit"],
+        .modal-content form .cancel-button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+             font-size: 1em;
+        }
+
+        .modal-content form button[type="submit"] {
+            background-color: #28a745; /* Màu xanh lá cho nút lưu */
+            color: white;
+        }
+
+        .modal-content form button[type="submit"]:hover {
+            background-color: #218838;
+        }
+
+        .modal-content form .cancel-button {
+            background-color: #6c757d; /* Màu xám cho nút hủy */
+            color: white;
+        }
+
+        .modal-content form .cancel-button:hover {
+            background-color: #5a6268;
+        }
+
+         /* Media query cho màn hình nhỏ trong index.html */
+         @media (max-width: 768px) {
+             body {
+                 padding: 10px;
+             }
+             .controls-container {
+                 flex-direction: column; /* Stack controls vertically */
+                 align-items: stretch; /* Stretch items */
+             }
+              .controls-container form {
+                  flex-direction: column;
+                  align-items: stretch;
+              }
+             .controls-container input[type="text"],
+             .controls-container select,
+             .controls-container button,
+             .controls-container .button-link {
+                 width: 100%; /* Full width on small screens */
+                 box-sizing: border-box; /* Include padding and border in width */
+             }
+             .game-list-grid {
+                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards */
+                 gap: 10px;
+             }
+             .game-card img {
+                 height: 100px; /* Smaller image height */
+             }
+             .card-content {
+                 padding: 10px;
+             }
+             .card-content h3 {
+                 font-size: 1em;
+             }
+              .card-content p {
+                 font-size: 0.8em;
+             }
+             .card-actions {
+                 padding: 10px;
+             }
+             .card-actions a {
+                 font-size: 0.8em;
+             }
+             .modal-content {
+                 width: 90%; /* Wider modal on small screens */
+                 margin: 10% auto;
+             }
+         }
+
+    </style>
 </head>
 <body>
-    <h1>Danh sách người dùng</h1>
 
-    <form action="{{ url_for('index') }}" method="get">
-        <input type="text" name="search" placeholder="Tìm kiếm username...">
-        <select name="sort_by">
-            <option value="username">Sắp xếp theo Username</option>
-            <option value="registration_date">Sắp xếp theo Ngày đăng ký</option>
-            </select>
-        <button type="submit">Tìm kiếm/Sắp xếp</button>
-    </form>
-    <br>
+    <div class="header-container">
+        <h1>Danh Sách Game</h1>
+    </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul class="flashes">
             {% for category, message in messages %}
@@ -27,30 +385,363 @@
         {% endif %}
     {% endwith %}
 
+    <div class="controls-container">
+        <form action="{{ url_for('list_data') }}" method="get">
+            <input type="text" name="search" placeholder="Tìm kiếm theo tên game..." value="{{ search_query }}">
+            <select name="sort_by">
+                <option value="game_name" {{ 'selected' if sort_by == 'game_name' else '' }}>Sắp xếp theo Tên Game</option>
+                <option value="date_released" {{ 'selected' if sort_by == 'date_released' else '' }}>Sắp xếp theo Ngày phát hành</option>
+                 <option value="game_price" {{ 'selected' if sort_by == 'game_price' else '' }}>Sắp xếp theo Giá</option>
+                </select>
+            <button type="submit">Tìm kiếm/Sắp xếp</button>
+        </form>
+         <a href="#" class="button-link">Thêm Game Mới</a>
+    </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Ngày đăng ký</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                <td>{{ row[0] }}</td> <td>{{ row[1] }}</td> <td>{{ row[2] }}</td> <td>{{ row[3] }}</td> <td>
-                    <a href="{{ url_for('edit_data', item_id=row[0]) }}">Sửa</a>
-                    <a href="{{ url_for('delete_data', item_id=row[0]) }}" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng {{ row[1] }}?');">Xóa</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <p><a href="{{ url_for('add_data') }}">Thêm người dùng mới</a></p>
+    <div class="game-list-grid">
+        {% for row in data %}
+        <div class="game-card">
+            <img src="{{ url_for('static', filename='game_placeholder.png') }}" alt="Game Cover">
+             <div class="card-content">
+                 <h3>{{ row[1] }}</h3> <p><strong>Giá:</strong> {{ row[2] }}</p> <p><strong>Engine:</strong> {{ row[3] }}</p> <p><strong>Nhà phát hành:</strong> {{ row[6] }}</p> <p><strong>Ngày phát hành:</strong> {{ row[7] | default("N/A") }}</p> </div>
 
-</body>
+            <div class="card-actions">
+                <a href="{{ url_for('edit_data', item_id=row[0]) }}" class="edit-link">Sửa</a> |
+                 <a href="{{ url_for('delete_data', item_id=row[0]) }}" onclick="return confirm('Bạn có chắc chắn muốn xóa game {{ row[1] }}?');">Xóa</a>
+            </div>
+        </div>
+        {% else %}
+        <p style="max-width: 1200px; margin: 20px auto; text-align: center; color: #b0b0b0;">Không tìm thấy game nào phù hợp.</p>
+        {% endfor %}
+    </div>
+
+
+    <div id="addGameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button add-close">&times;</span> <h2>Thêm Game Mới</h2>
+
+            <form id="addGameForm" action="{{ url_for('add_game_api') }}" method="post">
+                 <div>
+                    <label for="g_name">Game Name:</label><br>
+                    <input type="text" id="g_name" name="g_name" required>
+                </div>
+                <br>
+
+                <div>
+                    <label for="g_price">Price:</label><br>
+                    <input type="text" id="g_price" name="g_price">
+                </div>
+                <br>
+
+                 <div>
+                    <label for="g_engine">Engine:</label><br>
+                    <input type="text" id="g_engine" name="g_engine">
+                </div>
+                <br>
+
+                 <div>
+                    <label for="g_description">Description:</label><br>
+                    <textarea id="g_description" name="g_description"></textarea>
+                </div>
+                <br>
+
+                 <div>
+                    <label for="g_publisher">Publisher Name:</label><br>
+                    <input type="text" id="g_publisher" name="g_publisher" required>
+                </div>
+                <br>
+
+                 <div>
+                    <label for="released">Released Date:</label><br>
+                    <input type="date" id="released" name="released">
+                </div>
+                <br>
+
+                <button type="submit">Lưu Game</button>
+                <button type="button" class="cancel-button add-cancel">Hủy</button> </form>
+
+        </div>
+    </div>
+    <div id="editGameModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button edit-close">&times;</span>
+            <h2>Sửa Thông Tin Game</h2>
+
+            <form id="editGameForm" action="{{ url_for('update_game_api') }}" method="post">
+                 <input type="hidden" id="edit_game_id" name="game_id">
+
+                 <div>
+                    <label for="edit_g_name">Game Name:</label><br>
+                    <input type="text" id="edit_g_name" name="g_name">
+                </div>
+                <br>
+
+                <div>
+                    <label for="edit_g_price">Price:</label><br>
+                    <input type="text" id="edit_g_price" name="g_price">
+                </div>
+                <br>
+
+                 <div>
+                    <label for="edit_g_description">Description:</label><br>
+                    <textarea id="edit_g_description" name="g_description"></textarea>
+                </div>
+                <br>
+
+                <button type="submit">Lưu Thay Đổi</button>
+                <button type="button" class="cancel-button edit-cancel">Hủy</button>
+            </form>
+
+        </div>
+    </div>
+    <script>
+        // --- Lấy các phần tử DOM cho cả hai Modal ---
+        // Modal Thêm Mới
+        var addModal = document.getElementById("addGameModal");
+        var addBtn = document.querySelector(".controls-container a.button-link"); // Chọn dựa vào class .button-link
+        var addCloseSpan = addModal.querySelector(".close-button");
+        var addCancelButton = addModal.querySelector(".cancel-button");
+        var addForm = document.getElementById("addGameForm");
+
+         // Modal Sửa
+        var editModal = document.getElementById("editGameModal");
+        // Nút đóng (X) và nút Hủy của modal sửa
+        var editCloseSpan = editModal.querySelector(".close-button");
+        var editCancelButton = editModal.querySelector(".cancel-button");
+        var editForm = document.getElementById("editGameForm");
+        // Các input trong form sửa
+        var editGameIdInput = document.getElementById("edit_game_id");
+        var editGameNameInput = document.getElementById("edit_g_name");
+        var editGamePriceInput = document.getElementById("edit_g_price");
+        var editGameDescriptionInput = document.getElementById("edit_g_description");
+
+         // Lấy tất cả các link "Sửa" trong các thẻ game
+        var editLinks = document.querySelectorAll(".game-card .card-actions a.edit-link"); // Chọn dựa vào class .edit-link
+
+
+        // --- Hàm để Hiện/Ẩn Modal có hiệu ứng ---
+        function showModal(modalElement) {
+            modalElement.style.display = "block"; // Bước 1: Hiển thị container
+            // Bước 2: Thêm class 'show' sau một khoảng chờ nhỏ để kích hoạt transition
+            setTimeout(function() {
+                modalElement.classList.add('show');
+            }, 10); // 10ms là đủ để trình duyệt xử lý display: block
+        }
+
+        function hideModal(modalElement) {
+            modalElement.classList.remove('show'); // Bước 1: Xóa class 'show' để bắt đầu transition ngược
+            // Bước 2: Ẩn container hoàn toàn sau khi transition kết thúc
+            // Thời gian chờ phải khớp với thời gian transition trong CSS (0.3s = 300ms)
+            setTimeout(function() {
+                modalElement.style.display = "none";
+                // Tùy chọn: Reset form tương ứng khi đóng modal
+                if(modalElement.id === 'addGameModal') {
+                     modalElement.querySelector('form').reset(); // Reset form thêm
+                } else if (modalElement.id === 'editGameModal') {
+                     modalElement.querySelector('form').reset(); // Reset form sửa
+                }
+
+            }, 300); // Thời gian chờ khớp với CSS transition
+        }
+
+
+        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Mới ---
+
+        // Khi nhấp nút "Thêm Game Mới"
+        if(addBtn) { // Kiểm tra nút có tồn tại không
+             addBtn.onclick = function(event) {
+                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a> (chuyển hướng)
+                // form.reset(); // Reset form thêm trước khi mở (có thể làm trong hideModal hoặc ở đây)
+                showModal(addModal);
+            }
+        }
+
+
+        // Khi nhấp nút đóng (X) modal thêm
+        addCloseSpan.onclick = function() {
+            hideModal(addModal);
+        }
+
+        // Khi nhấp nút Hủy modal thêm
+        addCancelButton.onclick = function() {
+             hideModal(addModal);
+        }
+
+
+        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa và Tải dữ liệu ---
+
+        // Gán sự kiện click cho mỗi link "Sửa"
+        editLinks.forEach(link => {
+            link.onclick = function(event) {
+                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a> (chuyển hướng)
+
+                // Lấy Game ID từ thuộc tính href của link
+                // Ví dụ href="/edit/GA0001", chúng ta muốn lấy "GA0001"
+                var href = link.getAttribute('href');
+                var gameId = href.substring(href.lastIndexOf('/') + 1); // Lấy phần sau dấu '/' cuối cùng
+
+                // Reset form sửa trước khi tải dữ liệu mới
+                editForm.reset();
+
+                // --- Gửi yêu cầu AJAX đến backend để lấy dữ liệu game ---
+                // Sử dụng {{ url_for('get_game_api', game_id='_GAME_ID_') }} để Flask tạo mẫu URL
+                // Sau đó dùng .replace() trong JS để thay placeholder bằng gameId thực tế
+                var fetchUrl = "{{ url_for('get_game_api', game_id='_GAME_ID_') }}".replace('_GAME_ID_', gameId);
+
+                fetch(fetchUrl) // Gửi yêu cầu GET
+                .then(response => {
+                     if (!response.ok) {
+                         // Nếu có lỗi HTTP (ví dụ: 404 Not Found)
+                         // Cố gắng đọc JSON để lấy thông báo lỗi từ backend
+                         return response.json().then(data => {
+                            throw new Error(data.error || 'Could not fetch game data.');
+                        });
+                    }
+                    // Nếu thành công, đọc JSON
+                    return response.json();
+                })
+                .then(data => {
+                    // Xử lý dữ liệu phản hồi
+                    if (data.success && data.game) {
+                        // Đổ dữ liệu vào form sửa
+                        editGameIdInput.value = data.game.game_id;
+                        editGameNameInput.value = data.game.game_name !== null ? data.game.game_name : '';
+                        // Cần xử lý giá trị decimal/float từ JSON sang string cho input type="text"
+                        editGamePriceInput.value = data.game.game_price !== null ? parseFloat(data.game.game_price).toFixed(2) : ''; // Định dạng 2 chữ số thập phân
+                         // Xử lý giá trị null cho description
+                        editGameDescriptionInput.value = data.game.game_description !== null ? data.game.game_description : '';
+
+                        // Lưu ý: Engine, Publisher, Released Date không sửa qua SP UpdateGameInfo.
+                        // Nếu muốn hiển thị, cần thêm các phần tử HTML tĩnh và điền dữ liệu vào đó.
+
+                        // Hiện modal sửa
+                        showModal(editModal);
+                    } else {
+                        // Hiển thị thông báo lỗi nếu fetch thành công nhưng API báo lỗi logic
+                        alert("Error fetching game data: " + (data.error || "Unknown error."));
+                    }
+                })
+                .catch(error => {
+                    // Bắt các lỗi mạng hoặc lỗi từ khối .then()
+                    console.error('Error:', error);
+                    alert("An error occurred while fetching game data: " + error.message);
+                });
+            }
+        });
+
+        // Khi nhấp nút đóng (X) modal sửa
+        editCloseSpan.onclick = function() {
+            hideModal(editModal);
+        }
+
+        // Khi nhấp nút Hủy modal sửa
+        editCancelButton.onclick = function() {
+             hideModal(editModal);
+        }
+
+
+        // --- Xử lý sự kiện Nhấp ra ngoài Modal ---
+         // Đặt ở cuối để bắt sự kiện cho cả hai modal
+        window.onclick = function(event) {
+            if (event.target == addModal) {
+                hideModal(addModal);
+            }
+             if (event.target == editModal) {
+                hideModal(editModal);
+            }
+        }
+
+
+        // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX (Giữ nguyên logic) ---
+         // Đảm bảo addForm tồn tại trước khi gán onsubmit
+        if(addForm) {
+            addForm.onsubmit = function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(addForm);
+
+                fetch(addForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'An unknown error occurred on the server.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Game added successfully!");
+                        hideModal(addModal);
+                        window.location.reload(); // Tải lại trang để cập nhật danh sách
+                    } else {
+                         alert("Error: " + (data.error || "Failed to add game."));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred: " + error.message);
+                });
+            };
+        }
+
+
+        // --- JavaScript để Xử lý Form Sửa bằng AJAX ---
+         // Đảm bảo editForm tồn tại trước khi gán onsubmit
+        if(editForm) {
+            editForm.onsubmit = function(event) {
+                 event.preventDefault();
+
+                var formData = new FormData(editForm);
+
+                fetch(editForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                         return response.json().then(data => {
+                             throw new Error(data.error || 'An unknown error occurred on the server.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert("Game updated successfully!");
+                        hideModal(editModal);
+                        window.location.reload(); // Tải lại trang để cập nhật danh sách
+                    } else {
+                        alert("Error: " + (data.error || "Failed to update game."));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred: " + error.message);
+                });
+            };
+        }
+
+        // --- Hàm cho hiệu ứng mờ dần thông báo flash (tùy chọn) ---
+        window.addEventListener('load', function() {
+            const flashMessages = document.querySelectorAll('.flashes li');
+            flashMessages.forEach(msg => {
+                // Sau 5 giây, thêm class 'fade-out'
+                setTimeout(() => {
+                    msg.classList.add('fade-out');
+                    // Sau khi mờ dần (thời gian khớp với transition CSS), loại bỏ hoàn toàn phần tử
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500); // Thời gian này nên khớp với transition trong CSS (.flashes li)
+                }, 5000); // Thông báo hiển thị 5 giây
+            });
+        });
+
+
+    </script>
+    </body>
 </html>

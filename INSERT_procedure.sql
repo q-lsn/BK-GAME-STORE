@@ -8,7 +8,7 @@ GO
 --    CYCLE;				-- Restart after reaching max
 --GO
 
-CREATE PROCEDURE InsertGame
+CREATE OR ALTER PROCEDURE InsertGame
     @GName          varchar(80),
     @GPrice         decimal(10,2) = 0.00,    
     @GEngine        varchar(20) = 'Source',        
@@ -21,21 +21,21 @@ BEGIN
     IF @Released IS NULL
         SET @Released = CAST(GETDATE() AS DATE);
 
-        -- Validate release date is not in future
-        IF @Released > CAST(GETDATE() AS DATE)
-            THROW 50000, 'Cannot set release date to a future date.', 1;
+    -- Validate release date is not in future
+    IF @Released > CAST(GETDATE() AS DATE)
+        THROW 50000, 'Cannot set release date to a future date.', 1;
 
-        -- Validate publisher exists
-        IF NOT EXISTS (SELECT 1 FROM PUBLISHER WHERE name = @GPublisher)
-            THROW 50000, 'Publisher not found.', 1;
+    -- Validate publisher exists
+    IF NOT EXISTS (SELECT 1 FROM PUBLISHER WHERE name = @GPublisher)
+        THROW 50000, 'Publisher not found.', 1;
 
-        -- Validate game name doesn't already exist
-        IF EXISTS (SELECT 1 FROM GAMES WHERE game_name = @GName)
-            THROW 50000, 'Game already exists.', 1;
+    -- Validate game name doesn't already exist
+    IF EXISTS (SELECT 1 FROM GAMES WHERE game_name = @GName)
+        THROW 50000, 'Game already exists.', 1;
 
-        -- Validate price is not negative
-        IF @GPrice < 0
-            THROW 50000, 'Price cannot be negative.', 1;
+    -- Validate price is not negative
+    IF @GPrice < 0
+        THROW 50000, 'Price cannot be negative.', 1;
 
 	BEGIN TRY
 		-- Generate the new game ID
@@ -48,7 +48,7 @@ BEGIN
         SELECT @PID = publisher_id FROM PUBLISHER WHERE name = @GPublisher;
 
 		-- Insert the new game
-		INSERT INTO GAMES(game_id, game_name, game_price, engine, game_description, game_publisher, date_released)	VALUES
+		INSERT INTO GAMES(game_id, game_name, game_price, engine, game_description, game_publisher, date_released) VALUES
 		(	@GID,
 			@GName,
 			@GPrice,
@@ -57,11 +57,10 @@ BEGIN
 			@PID, 
 			@Released
 		);
-        -- Return the generated game ID
-        SELECT @GID AS NewGameID;
+		PRINT 'Insert game successfully.';
     END TRY
     BEGIN CATCH
-        THROW;
+        THROW 50000, 'Failed to insert game.', 1;
     END CATCH;
 END;
 GO

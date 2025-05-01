@@ -8,8 +8,8 @@
         /* --- Các style cụ thể cho home.html --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font chữ hiện đại, dễ đọc */
-            background-color: #f4f7f6; /* Nền màu xám nhạt */
-            color: #333; /* Màu chữ tối */
+            background-color: #1a202a; /* Nền màu tối */
+            color: #e0e0e0; /* Màu chữ sáng */
             margin: 0; /* Xóa margin mặc định của body */
             padding: 0;
             display: flex; /* Sử dụng flexbox để căn giữa nội dung */
@@ -23,28 +23,28 @@
 
         .container {
             text-align: center;
-            background-color: #fff; /* Nền trắng cho container */
+            background-color: #2d3b45; /* Nền tối hơn cho container */
             padding: 40px; /* Padding bên trong container */
             border-radius: 8px; /* Góc bo tròn */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Đổ bóng đậm hơn */
             z-index: 1; /* Đảm bảo nội dung nổi lên trên video */
             position: relative; /* Quan trọng cho z-index */
         }
 
         h1 {
-            color: #0056b3; /* Màu tiêu đề */
+            color: #1a9fd9; /* Màu tiêu đề */
             margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
         }
 
         .logo {
-            max-width: 200px; /* Giới hạn kích thước logo */
+            max-width: 250px; /* Giới hạn kích thước logo */
             height: auto;
             margin-bottom: 30px; /* Khoảng cách dưới logo */
         }
 
         .slogan {
-            font-size: 1.2em; /* Kích thước chữ slogan */
-            color: #555; /* Màu chữ slogan hơi xám */
+            font-size: 1.3em; /* Kích thước chữ slogan lớn hơn */
+            color: #b0b0b0; /* Màu xám nhạt hơn cho slogan */
             margin-bottom: 40px; /* Khoảng cách dưới slogan */
             font-style: italic; /* In nghiêng slogan */
         }
@@ -60,25 +60,31 @@
             font-size: 1em; /* Kích thước chữ nút */
             text-decoration: none;
             color: white;
-            background-color: #007bff; /* Màu nền nút */
+            background: linear-gradient(to bottom, #41a7e8, #1a9fd9); /* Màu gradient xanh Steam */
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu khi hover */
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Hiệu ứng chuyển màu nền và transform */
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Đổ bóng cho nút */
         }
 
         .button-container a:hover {
-            background-color: #0056b3; /* Màu nền nút khi hover */
+            background: linear-gradient(to bottom, #1a9fd9, #41a7e8); /* Đảo gradient khi hover */
+            transform: translateY(-3px); /* Nâng nhẹ nút lên */
         }
+         .button-container a:active {
+             transform: translateY(0); /* Trở lại vị trí cũ khi nhấp */
+         }
+
 
         /* --- Style cho video nền --- */
          .background-video-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 25%; /* Tăng kích thước video một chút */
+            width: 12.5%; /* Chiều rộng video (đã giảm một nửa) */
             height: auto;
-            overflow: hidden; /* Đảm bảo video không tràn ra khỏi container */
+            overflow: hidden;
             border-radius: 8px; /* Góc bo tròn cho video */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng cho video */
             z-index: 0; /* Đảm bảo container nội dung nổi lên trên video */
@@ -86,16 +92,9 @@
         }
 
         .background-video-container video {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 12.5%; /* <-- Thay đổi từ 25% thành 12.5% */
-            height: auto;
-            overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            z-index: 0;
-            opacity: 0.7;
+             width: 100%;
+             height: auto;
+             display: block; /* Loại bỏ khoảng trắng dưới video */
         }
 
 
@@ -107,7 +106,12 @@
             }
             .logo {
                 max-width: 150px;
+                margin-bottom: 20px;
             }
+             h1 {
+                 font-size: 1.8em;
+                 margin-bottom: 15px;
+             }
              .slogan {
                 font-size: 1em;
                 margin-bottom: 20px;
@@ -115,11 +119,12 @@
              .button-container a {
                 padding: 10px 20px;
                 font-size: 0.9em;
+                margin: 5px; /* Giảm khoảng cách giữa các nút trên màn hình nhỏ */
             }
              .background-video-container {
                 bottom: 10px;
                 right: 10px;
-                width: 40%; /* Giảm kích thước video trên màn hình nhỏ */
+                width: 20%; /* Điều chỉnh kích thước video trên màn hình nhỏ */
             }
         }
 
@@ -130,15 +135,13 @@
     <div class="container">
         <h1>Chào mừng đến với Ứng dụng Quản lý Cơ sở dữ liệu</h1>
 
-        <img src="{{ url_for('static', filename='BKGS.png') }}" alt="Web Logo" class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Web Logo" class="logo">
         <p class="slogan">
             Ở đây chúng tôi có mọi tựa game mà bạn mong muốn, cứ việc mua game còn việc của chúng tôi là bào cái ví của các bạn.
         </p>
 
         <div class="button-container">
             <a href="{{ url_for('list_data') }}">Xem Danh Sách Dữ Liệu</a>
-
-            <a href="{{ url_for('add_data') }}">Thêm Mới Dữ Liệu</a>
 
             </div>
     </div>
