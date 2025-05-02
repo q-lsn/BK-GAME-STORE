@@ -3,9 +3,9 @@ GO
 
 CREATE FUNCTION CalculateUserSpending
 (
-    @InputUserID INT,   -- input, id người dùng
-    @StartDate DATE,    -- input, ngày bắt đầu
-    @EndDate DATE		-- input, ngày kết thúc
+    @InputUserID    VARCHAR(6),     -- input, id người dùng
+    @StartDate      DATE,           -- input, ngày bắt đầu
+    @EndDate        DATE		    -- input, ngày kết thúc
 )
 RETURNS DECIMAL(18, 2)
 AS
