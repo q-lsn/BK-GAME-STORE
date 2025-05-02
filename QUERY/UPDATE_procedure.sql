@@ -12,9 +12,9 @@ BEGIN
 	IF NOT EXISTS(SELECT 1 FROM GAMES WHERE game_id = @GID)
         THROW 50000, 'Game not found.', 1;
 
-    -- Validate game name doesn't already excluding the current game being updated
+    -- Validate game name doesn't already exist, excluding the current game being updated
     IF EXISTS (SELECT 1 FROM GAMES WHERE game_name = @GName and game_id <> @GID)
-        THROW 50000, 'Game already exists.', 1;
+        THROW 50000, 'Game''s name already used by another game.', 1;
 
     -- Validate price is not negative
     IF @GPrice < 0
