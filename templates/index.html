@@ -7,150 +7,70 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
-        /* --- Các style chung cho các trang (có thể di chuyển sang style.css) --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a202a; /* Nền màu tối */
-            color: #e0e0e0; /* Màu chữ sáng */
-            margin: 0;
-            padding: 20px; /* Thêm padding cho body */
-            line-height: 1.6; /* Tăng khoảng cách dòng */
-        }
-
-         h1, h2, h3 {
-             color: #1a9fd9; /* Màu xanh Steam cho tiêu đề */
-         }
-
-         a {
-             color: #1a9fd9; /* Màu xanh Steam cho link */
-             text-decoration: none;
-         }
-         a:hover {
-             text-decoration: underline;
-         }
-
-        /* Style cho flash messages */
-        .flashes {
-             list-style: none;
-             padding: 0;
-             margin: 10px auto; /* Căn giữa */
-             max-width: 1200px; /* Giới hạn chiều rộng */
-             text-align: center;
-        }
-
-        .flashes li {
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            opacity: 1; /* Mặc định hiển thị rõ */
-            transition: opacity 0.5s ease; /* Hiệu ứng mờ dần */
-        }
-         /* Class cho thông báo mờ dần */
-        .flashes li.fade-out {
-             opacity: 0;
-         }
-
-        .success {
-            background-color: #28a745; /* Xanh lá */
-            color: white;
-        }
-
-        .warning {
-            background-color: #ffc107; /* Vàng */
-            color: #333;
-        }
-
-        .danger {
-            background-color: #dc3545; /* Đỏ */
-            color: white;
-        }
-
-
-        /* --- Các style cụ thể cho index.html (Danh sách Game) --- */
+        /* Style cụ thể cho index.html */
         .header-container {
-            max-width: 1200px; /* Giới hạn chiều rộng nội dung */
+            max-width: 1000px; /* Giới hạn chiều rộng nội dung */
             margin: 0 auto 30px auto; /* Căn giữa và thêm khoảng cách dưới */
             text-align: center;
         }
 
          .controls-container {
-             max-width: 1200px;
+             max-width: 1000px; /* Giới hạn chiều rộng */
              margin: 0 auto 20px auto;
-             background-color: #2d3b45; /* Nền tối hơn */
+             background-color: #2d3b45;
              padding: 15px;
              border-radius: 5px;
-             display: flex; /* Sử dụng flexbox cho các control */
-             gap: 15px; /* Khoảng cách giữa các item */
-             flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
+             display: flex;
+             gap: 15px;
+             flex-wrap: wrap;
              align-items: center;
-             justify-content: flex-start; /* Căn sang trái */
+             justify-content: flex-start;
          }
-
-         /* Style cho nút "Thêm Game Mới" */
-         .controls-container .button-link {
-             display: inline-block;
-             padding: 8px 15px;
-             background: linear-gradient(to bottom, #28a745, #218838); /* Màu xanh lá */
-             color: white;
-             border: none;
-             border-radius: 4px;
-             text-decoration: none;
-             cursor: pointer;
-             transition: background-color 0.3s ease;
-             font-size: 1em;
-         }
-         .controls-container .button-link:hover {
-             background: linear-gradient(to bottom, #218838, #28a745);
-         }
-
 
         .game-list-grid {
-            display: grid; /* Sử dụng Grid Layout */
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Tạo lưới cột tự động, mỗi cột rộng tối thiểu 250px */
-            gap: 20px; /* Khoảng cách giữa các thẻ game */
-            max-width: 1200px; /* Giới hạn chiều rộng lưới */
-            margin: 0 auto; /* Căn giữa lưới */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px; /* Giới hạn chiều rộng lưới */
+            margin: 0 auto;
             padding: 0;
-            list-style: none; /* Xóa dấu đầu dòng */
+            list-style: none;
         }
 
         .game-card {
-            background-color: #2d3b45; /* Nền tối hơn cho thẻ */
+            background-color: #2d3b45;
             border-radius: 8px;
-            overflow: hidden; /* Cắt nội dung tràn */
+            overflow: hidden;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover */
-            color: #e0e0e0; /* Màu chữ sáng */
-            display: flex; /* Sử dụng flexbox cho nội dung card */
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Giữ hiệu ứng hover đơn giản */
+            color: #e0e0e0;
+            display: flex;
             flex-direction: column;
-            /* --- Thêm data attributes cho các trường cần sửa --- */
-            /* Các data attribute này sẽ được JavaScript đọc khi mở modal sửa */
+             /* --- Thêm data attributes cho các trường cần sửa --- */
              /* game_id, game_name, game_price, game_description */
-             /* Các cột khác như engine, publisher, date_released không sửa qua SP UpdateGameInfo,
-             nên không cần nhúng vào data attribute nếu không sửa. Nếu muốn sửa, cần sửa SP */
         }
 
         .game-card:hover {
-            transform: translateY(-5px); /* Nâng nhẹ thẻ khi hover */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Đổ bóng đậm hơn khi hover */
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         .game-card img {
-            width: 100%; /* Ảnh nền/cover chiếm toàn bộ chiều rộng thẻ */
-            height: 150px; /* Chiều cao cố định cho ảnh (tùy chỉnh) */
-            object-fit: cover; /* Đảm bảo ảnh không bị méo */
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
         }
 
         .card-content {
             padding: 15px;
-            flex-grow: 1; /* Cho phép nội dung giãn nở để thẻ có chiều cao bằng nhau */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
         .card-content h3 {
             margin-top: 0;
-            color: #1a9fd9; /* Màu xanh cho tên game */
+            color: #1a9fd9;
             font-size: 1.1em;
             margin-bottom: 10px;
         }
@@ -158,156 +78,49 @@
         .card-content p {
             margin: 5px 0;
             font-size: 0.9em;
-            color: #b0b0b0; /* Màu xám nhạt cho thông tin phụ */
+            color: #b0b0b0;
         }
 
          .card-actions {
             padding: 15px;
-            border-top: 1px solid #3a4752; /* Đường kẻ phân cách */
-            background-color: #3a4752; /* Nền tối hơn cho phần action */
+            border-top: 1px solid #3a4752;
+            background-color: #3a4752;
             display: flex;
-            justify-content: space-around; /* Căn đều các nút */
-             align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: space-around;
+             align-items: center;
          }
 
         .card-actions a {
-            color: #1a9fd9; /* Màu xanh cho link action */
+            color: #1a9fd9;
             text-decoration: none;
             font-size: 0.9em;
-            transition: color 0.3s ease; /* Hiệu ứng chuyển màu */
-            cursor: pointer; /* Con trỏ tay cho các link kích hoạt JS/modal */
+            transition: color 0.3s ease;
+            cursor: pointer;
         }
 
         .card-actions a:hover {
-            color: #41a7e8; /* Màu xanh nhạt hơn khi hover */
+            color: #41a7e8;
              text-decoration: underline;
         }
 
         /* Style cho icon xóa */
          .card-actions .delete-icon {
-              color: #dc3545; /* Màu đỏ cho icon xóa */
-              cursor: pointer; /* Biểu tượng con trỏ tay */
-              font-size: 1em; /* Kích thước icon */
-              transition: color 0.3s ease; /* Hiệu ứng chuyển màu */
-              margin-left: 10px; /* Khoảng cách với link sửa */
+              color: #dc3545;
+              cursor: pointer;
+              font-size: 1em;
+              transition: color 0.3s ease;
+              margin-left: 10px;
          }
           .card-actions .delete-icon:hover {
-              color: #ff7675; /* Màu đỏ nhạt hơn khi hover */
+              color: #ff7675;
           }
 
 
-        /* --- Cấu trúc Modal (Áp dụng cho cả hai modal: #addGameModal, #editGameModal) --- */
-        /* Style này cần được copy từ style.css hoặc thêm vào đây */
-         .modal {
-            display: none; /* Mặc định ẩn modal */
-            position: fixed; /* Giữ cố định trên toàn màn hình */
-            z-index: 1000; /* Đảm bảo modal hiển thị trên các nội dung khác */
-            left: 0;
-            top: 0;
-            width: 100%; /* Chiều rộng toàn màn hình */
-            height: 100%; /* Chiều cao toàn màn hình */
-            overflow: auto; /* Cho phép cuộn nếu nội dung quá dài */
-            background-color: rgba(0, 0, 0, 0.6); /* Lớp nền mờ màu đen */
-            /* Thêm các thuộc tính cho hiệu ứng mờ dần */
-            opacity: 0; /* Bắt đầu với độ trong suốt bằng 0 */
-            transition: opacity 0.3s ease; /* Hiệu ứng chuyển đổi độ trong suốt trong 0.3 giây */
-            pointer-events: none; /* Ngăn chặn tương tác chuột khi ẩn */
-        }
-
-        /* Định nghĩa trạng thái khi modal hiển thị */
-        .modal.show {
-            opacity: 1; /* Hiện rõ hoàn toàn */
-            pointer-events: auto; /* Cho phép tương tác chuột khi hiển thị */
-        }
-
-        .modal-content {
-            background-color: #2d3b45; /* Nền của nội dung modal (tông màu Steam) */
-            margin: 5% auto; /* Căn giữa theo chiều dọc và thêm margin trên dưới */
-            padding: 20px;
-            border: 1px solid #555;
-            border-radius: 8px;
-            width: 80%; /* Chiều rộng của nội dung modal */
-            max-width: 500px; /* Chiều rộng tối đa */
-            position: relative; /* Quan trọng cho nút đóng */
-            color: #e0e0e0; /* Màu chữ sáng */
-            /* Tùy chọn: Thêm hiệu ứng trượt nhẹ khi hiện/ẩn */
-            transform: translateY(-50px); /* Bắt đầu từ vị trí hơi cao hơn */
-            transition: transform 0.3s ease; /* Hiệu ứng chuyển đổi vị trí */
-        }
-
-        /* Khi modal có class 'show', áp dụng transform cho modal-content */
-        .modal.show .modal-content {
-            transform: translateY(0); /* Di chuyển về vị trí ban đầu */
-        }
+        /* Style cho Modal (đã có style chung) */
+         /* #addGameModal, #editGameModal */
 
 
-        .modal-content h2 {
-            margin-top: 0;
-            color: #1a9fd9; /* Màu xanh Steam cho tiêu đề modal */
-            margin-bottom: 20px;
-        }
-
-        .close-button {
-            color: #aaa;
-            float: right; /* Đặt nút đóng ở góc trên bên phải */
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute; /* Định vị tuyệt đối so với modal-content */
-            top: 10px;
-            right: 15px;
-        }
-
-        .close-button:hover,
-        .close-button:focus {
-            color: #e0e0e0;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* Style cho các input và textarea trong form modal */
-        .modal-content form input[type="text"],
-        .modal-content form input[type="date"],
-        .modal-content form textarea {
-            width: calc(100% - 22px); /* Chiếm gần hết chiều rộng, trừ padding và border */
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background-color: #3a4752; /* Nền tối cho input */
-            color: #e0e0e0; /* Chữ sáng */
-            font-size: 1em;
-        }
-
-        .modal-content form button[type="submit"],
-        .modal-content form .cancel-button {
-            padding: 10px 20px;
-            margin-right: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-             font-size: 1em;
-        }
-
-        .modal-content form button[type="submit"] {
-            background-color: #28a745; /* Màu xanh lá cho nút lưu */
-            color: white;
-        }
-
-        .modal-content form button[type="submit"]:hover {
-            background-color: #218838;
-        }
-
-        .modal-content form .cancel-button {
-            background-color: #6c757d; /* Màu xám cho nút hủy */
-            color: white;
-        }
-
-        .modal-content form .cancel-button:hover {
-            background-color: #5a6268;
-        }
-
-         /* Media query cho màn hình nhỏ */
+        /* Media query cho màn hình nhỏ */
          @media (max-width: 768px) {
              body {
                  padding: 10px;
@@ -341,8 +154,8 @@
                  padding: 10px;
              }
              .card-actions a,
-             .card-actions .delete-icon { /* Bao gồm icon xóa */
-                 font-size: 0.9em; /* Giữ kích thước để dễ bấm */
+             .card-actions .delete-icon {
+                 font-size: 0.9em;
              }
              .modal-content {
                  width: 90%;
@@ -376,21 +189,22 @@
     <div class="game-list-grid">
         {% for row in data %}
         <div class="game-card"
-             data-game-id="{{ row[0] }}"
-             data-game-name="{{ row[1] }}"
-             data-game-price="{{ row[2] | default('') }}" {# Sử dụng default '' nếu giá là NULL #}
-             data-game-description="{{ row[4] | default('') }}"> {# Sử dụng default '' nếu mô tả là NULL #}
-             <img src="{{ url_for('static', filename='game_placeholder.png') }}" alt="Game Cover">
+             data-game-id="{{ row['game_id'] | default('') }}"
+             data-game-name="{{ row['game_name'] | default('') }}"
+             data-game-price="{{ row['game_price'] | default('') }}"
+             data-game-description="{{ row['game_description'] | default('') }}"> {# game_description từ GetGamesFilteredSorted #}
+
+            <img src="{{ url_for('static', filename='game_placeholder.png') }}" alt="Game Cover">
 
             <div class="card-content">
-                <h3>{{ row[1] }}</h3> <p><strong>Giá:</strong> {{ row[2] }}</p> <p><strong>Engine:</strong> {{ row[3] }}</p> <p><strong>Nhà phát hành:</strong> {{ row[6] }}</p> <p><strong>Ngày phát hành:</strong> {{ row[7] | default("N/A") }}</p> </div>
+                <h3>{{ row['game_name'] | default('N/A') }}</h3> <p><strong>Giá:</strong> {{ row['game_price'] | default(0.00) }}</p> <p><strong>Engine:</strong> {{ row['engine'] | default('N/A') }}</p> <p><strong>Nhà phát hành:</strong> {{ row['publisher_name'] | default('N/A') }}</p> <p><strong>Ngày phát hành:</strong> {{ row['date_released'] | default("N/A") }}</p> </div>
 
             <div class="card-actions">
                 <a href="#" class="edit-link">Sửa</a> |
-                 <span class="delete-icon" data-game-id="{{ row[0] }}">&times;</span> </div>
+                 <span class="delete-icon" data-item-id="{{ row['game_id'] | default('') }}">&times;</span> </div>
         </div>
         {% else %}
-        <p style="max-width: 1200px; margin: 20px auto; text-align: center; color: #b0b0b0;">Không tìm thấy game nào phù hợp.</p>
+        <p style="max-width: 1000px; margin: 20px auto; text-align: center; color: #b0b0b0;">Không tìm thấy game nào.</p>
         {% endfor %}
     </div>
 
@@ -451,7 +265,7 @@
 
                  <div>
                     <label for="edit_g_name">Game Name:</label><br>
-                    <input type="text" id="edit_g_name" name="g_name">
+                    <input type="text" id="edit_g_name" name="g_name" required>
                 </div>
                 <br>
 
@@ -474,15 +288,15 @@
         </div>
     </div>
     <script>
-        // --- Lấy các phần tử DOM cho cả hai Modal ---
+        // --- Lấy các phần tử DOM cho cả hai Modal Game ---
         // Modal Thêm Mới
         var addModal = document.getElementById("addGameModal");
-        var addBtn = document.getElementById("addGameBtn"); // Lấy theo ID mới
-        var addCloseSpan = addModal.querySelector(".close-button"); // Lấy theo class hoặc trực tiếp
+        var addBtn = document.getElementById("addGameBtn");
+        var addCloseSpan = addModal.querySelector(".close-button");
         var addCancelButton = addModal.querySelector(".cancel-button");
         var addForm = document.getElementById("addGameForm");
 
-         // Modal Sửa
+         // Modal Sửa Game
         var editModal = document.getElementById("editGameModal");
         var editCloseSpan = editModal.querySelector(".close-button");
         var editCancelButton = editModal.querySelector(".cancel-button");
@@ -492,34 +306,28 @@
         var editGamePriceInput = document.getElementById("edit_g_price");
         var editGameDescriptionInput = document.getElementById("edit_g_description");
 
-         // Lấy tất cả các link "Sửa" và icon "Xóa" trong các thẻ game
+         // Lấy tất cả các link "Sửa" và icon "Xóa" trong các thẻ game card
         var editLinks = document.querySelectorAll(".game-card .card-actions a.edit-link");
         var deleteIcons = document.querySelectorAll(".game-card .card-actions .delete-icon");
 
 
-        // --- Hàm để Hiện/Ẩn Modal có hiệu ứng ---
+        // --- Hàm để Hiện/Ẩn Modal (chung) ---
         function showModal(modalElement) {
             modalElement.style.display = "block";
-            setTimeout(function() {
-                modalElement.classList.add('show');
-            }, 10); // Delay nhỏ cho hiệu ứng
+             // Bỏ hiệu ứng show/transform nếu muốn đơn giản hơn
+            modalElement.classList.add('show'); // Giữ lại class 'show' để quản lý trạng thái nếu cần JS
         }
 
         function hideModal(modalElement) {
-            modalElement.classList.remove('show');
-            setTimeout(function() {
-                modalElement.style.display = "none";
-                // Reset form tương ứng khi đóng modal
-                if(modalElement.id === 'addGameModal') {
-                     modalElement.querySelector('form').reset();
-                } else if (modalElement.id === 'editGameModal') {
-                     modalElement.querySelector('form').reset();
-                }
-            }, 300); // Thời gian chờ khớp với CSS transition
+             // Bỏ hiệu ứng hide/transform nếu muốn đơn giản hơn
+             modalElement.classList.remove('show'); // Giữ lại class 'show'
+            modalElement.style.display = "none";
+            // Reset form tương ứng khi đóng modal
+            modalElement.querySelector('form').reset();
         }
 
 
-        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Mới ---
+        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Game ---
         if(addBtn) {
              addBtn.onclick = function(event) {
                 event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a>
@@ -531,37 +339,35 @@
         addCancelButton.onclick = function() { hideModal(addModal); }
 
 
-        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa và Đọc dữ liệu từ HTML ---
+        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa Game và Đọc dữ liệu từ HTML ---
         editLinks.forEach(link => {
             link.onclick = function(event) {
                 event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a>
 
                 // --- Đọc dữ liệu game từ các data attribute của thẻ cha .game-card ---
-                const gameCard = link.closest('.game-card'); // Tìm phần tử .game-card cha gần nhất
+                const gameCard = link.closest('.game-card');
                 const gameId = gameCard ? gameCard.getAttribute('data-game-id') : null;
                 const gameName = gameCard ? gameCard.getAttribute('data-game-name') : null;
                 const gamePrice = gameCard ? gameCard.getAttribute('data-game-price') : null;
                 const gameDescription = gameCard ? gameCard.getAttribute('data-game-description') : null;
+
 
                 if (!gameId) {
                      alert("Lỗi: Không lấy được Game ID từ HTML.");
                      return;
                 }
 
-                // Reset form sửa trước khi điền dữ liệu mới
+                // Reset form sửa game trước khi điền dữ liệu mới
                 editForm.reset();
 
-                // --- Điền dữ liệu vào form sửa modal ---
+                // --- Điền dữ liệu vào form sửa modal Game ---
                 editGameIdInput.value = gameId;
-                // Sử dụng giá trị rỗng nếu data attribute là null
                 editGameNameInput.value = gameName !== null ? gameName : '';
                 editGamePriceInput.value = gamePrice !== null ? gamePrice : '';
                 editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
 
-                // Hiện modal sửa
+                // Hiện modal sửa game
                 showModal(editModal);
-
-                // --- Đã bỏ đoạn mã fetch(fetchUrl) đến get_game_api ---
             }
         });
 
@@ -572,6 +378,7 @@
         window.onclick = function(event) {
             if (event.target == addModal) { hideModal(addModal); }
             if (event.target == editModal) { hideModal(editModal); }
+             // TODO: Thêm xử lý cho modal sửa chung (genericEditModal)
         }
 
 
@@ -588,27 +395,22 @@
                 })
                 .then(response => {
                     if (!response.ok) {
-                        // Nếu response status không phải 2xx, cố gắng đọc lỗi JSON
                         return response.json().then(data => {
                             throw new Error(data.error || `HTTP error! Status: ${response.status}`);
                         });
                     }
-                    // Nếu thành công, đọc JSON
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        // Sử dụng thông báo từ backend
                         alert(data.message || "Game added successfully!");
                         hideModal(addModal);
                         window.location.reload(); // Tải lại trang để cập nhật danh sách
                     } else {
-                         // Xử lý trường hợp success: false
                          alert("Error: " + (data.error || "Failed to add game."));
                     }
                 })
                 .catch(error => {
-                    // Bắt lỗi mạng hoặc lỗi từ khối .then()
                     console.error('Error:', error);
                     alert("An error occurred: " + error.message);
                 });
@@ -616,55 +418,50 @@
         }
 
 
-        // --- JavaScript để Xử lý Form Sửa bằng AJAX ---
+        // --- JavaScript để Xử lý Form Sửa Game bằng AJAX ---
         if(editForm) {
             editForm.onsubmit = function(event) {
                  event.preventDefault();
 
                 var formData = new FormData(editForm);
 
-                fetch(editForm.action, {
+                fetch(editForm.action, { // Action trỏ đến update_game_api
                     method: 'POST',
                     body: formData
                 })
                 .then(response => {
                     if (!response.ok) {
-                         // Nếu response status không phải 2xx, cố gắng đọc lỗi JSON
                          return response.json().then(data => {
                              throw new Error(data.error || `HTTP error! Status: ${response.status}`);
                         });
                     }
-                    // Nếu thành công, đọc JSON
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        // Sử dụng thông báo từ backend
                         alert(data.message || "Game updated successfully!");
                         hideModal(editModal);
                         window.location.reload(); // Tải lại trang để cập nhật danh sách
                     } else {
-                         // Xử lý trường hợp success: false
                         alert("Error: " + (data.error || "Failed to update game."));
                     }
                 })
                 .catch(error => {
-                    // Bắt lỗi mạng hoặc lỗi từ khối .then()
                     console.error('Error:', error);
                     alert("An error occurred while updating the game: " + error.message);
                 });
             };
         }
 
-        // --- JavaScript để Xử lý Xóa bằng AJAX ---
+        // --- JavaScript để Xử lý Xóa Game bằng AJAX ---
         deleteIcons.forEach(icon => {
             icon.onclick = function(event) {
                 event.preventDefault();
 
                 // Lấy Game ID từ data attribute của icon
-                const gameId = icon.getAttribute('data-game-id');
+                const itemId = icon.getAttribute('data-item-id');
 
-                if (!gameId) {
+                if (!itemId) {
                      alert("Lỗi: Không lấy được Game ID để xóa.");
                      return;
                 }
@@ -672,58 +469,35 @@
                 // Xác nhận trước khi xóa
                 if (confirm('Bạn có chắc chắn muốn xóa game này không?')) {
                     // Gửi yêu cầu AJAX để xóa
-                    // Sử dụng POST với FormData chứa item_id
                     const formData = new FormData();
-                    formData.append('item_id', gameId);
+                    formData.append('item_id', itemId);
 
-                    fetch("{{ url_for('delete_game_api') }}", { // URL của route API xóa
-                        method: 'POST', // Sử dụng POST như định nghĩa route API xóa
+                    fetch("{{ url_for('delete_game_api') }}", { // URL của route API xóa game
+                        method: 'POST',
                         body: formData
                     })
                     .then(response => {
-                        // Kiểm tra response.ok trước khi đọc JSON
                         if (!response.ok) {
-                            // Cố gắng đọc JSON để lấy thông báo lỗi từ backend
                             return response.json().then(data => {
                                 throw new Error(data.error || `HTTP error! Status: ${response.status}`);
                             });
                         }
-                        // Nếu thành công (status 2xx), đọc JSON
                         return response.json();
                     })
                     .then(data => {
                         if (data.success) {
-                            // Sử dụng thông báo từ backend
                             alert(data.message || "Game deleted successfully!");
                             window.location.reload(); // Tải lại trang để cập nhật danh sách
                         } else {
-                            // Xử lý trường hợp success: false
                             alert("Error: " + (data.error || "Failed to delete game."));
                         }
                     })
                     .catch(error => {
-                        // Bắt lỗi mạng hoặc lỗi từ khối .then()
                         console.error('Error:', error);
                         alert("An error occurred while deleting the game: " + error.message);
                     });
                 }
             }
-        });
-
-
-        // --- Hàm cho hiệu ứng mờ dần thông báo flash ---
-        window.addEventListener('load', function() {
-            const flashMessages = document.querySelectorAll('.flashes li');
-            flashMessages.forEach(msg => {
-                // Sau 5 giây, thêm class 'fade-out'
-                setTimeout(() => {
-                    msg.classList.add('fade-out');
-                    // Sau khi mờ dần (thời gian khớp với transition CSS), loại bỏ hoàn toàn phần tử
-                    setTimeout(() => {
-                        msg.remove();
-                    }, 500); // Thời gian này nên khớp với transition trong CSS (.flashes li)
-                }, 5000); // Thông báo hiển thị 5 giây
-            });
         });
 
     </script>

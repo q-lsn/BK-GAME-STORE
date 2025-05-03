@@ -1,0 +1,371 @@
+/* --- Các style chung cho toàn bộ ứng dụng --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a202a; /* Nền màu tối */
+    color: #e0e0e0; /* Màu chữ sáng */
+    margin: 0;
+    padding: 20px; /* Thêm padding cho body */
+    line-height: 1.6; /* Tăng khoảng cách dòng */
+}
+
+h1, h2, h3 {
+    color: #1a9fd9; /* Màu xanh Steam cho tiêu đề */
+}
+
+a {
+    color: #1a9fd9; /* Màu xanh Steam cho link */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* Style cho flash messages */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 10px auto; /* Căn giữa */
+    max-width: 1000px; /* Giới hạn chiều rộng */
+    text-align: center;
+}
+
+.flashes li {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    /* Loại bỏ hiệu ứng mờ dần */
+    /* opacity: 1; */
+    /* transition: none; */
+}
+
+.success {
+    background-color: #28a745; /* Xanh lá */
+    color: white;
+}
+
+.warning {
+    background-color: #ffc107; /* Vàng */
+    color: #333;
+}
+
+.danger {
+    background-color: #dc3545; /* Đỏ */
+    color: white;
+}
+
+/* --- Style cho nút chung (dùng cho home, add button) --- */
+.button-link {
+    display: inline-block;
+    padding: 8px 15px;
+    background: linear-gradient(to bottom, #1a9fd9, #1a80b9); /* Steam blue gradient */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Giữ hiệu ứng hover đơn giản */
+    font-size: 1em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.button-link:hover {
+    background: linear-gradient(to bottom, #1a80b9, #1a9fd9);
+}
+
+/* --- Container chung cho nội dung trang --- */
+.container {
+    max-width: 1000px; /* Giới hạn chiều rộng nội dung */
+    margin: 0 auto; /* Căn giữa */
+}
+
+/* --- Style cho các phần nội dung (ví dụ: procedure-section) --- */
+.content-section { /* Tên chung hơn procedure-section */
+    background-color: #2d3b45; /* Nền tối hơn */
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.content-section h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #3a4752;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.content-section form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #b0b0b0;
+}
+
+.content-section form input[type="text"],
+.content-section form input[type="date"],
+.content-section form input[type="number"],
+.content-section form select,
+.content-section form textarea { /* Thêm textarea */
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #3a4752;
+    color: #e0e0e0;
+    font-size: 1em;
+}
+
+.content-section form button[type="submit"] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #28a745;
+    color: white;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+.content-section form button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+
+/* --- Style cho khu vực hiển thị kết quả (bảng) --- */
+.results-area {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #3a4752;
+}
+
+.results-area h3 {
+    margin-top: 0;
+    color: #ffc107; /* Màu vàng */
+    font-size: 1.1em;
+}
+
+.results-area table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng rộng */
+    display: block; /* Quan trọng để overflow-x hoạt động */
+    white-space: nowrap; /* Ngăn chữ bị ngắt dòng trong ô */
+}
+
+.results-area table th,
+.results-area table td {
+    border: 1px solid #555;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+     white-space: normal; /* Cho phép ngắt dòng bình thường bên trong td/th */
+}
+
+.results-area table th {
+    background-color: #3a4752;
+    color: #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.results-area table tr:nth-child(even) {
+    background-color: #34404a;
+}
+
+.results-area table tr:hover {
+    background-color: #4a5662;
+}
+
+/* Style cho cột Actions trong bảng (Sửa/Xóa) */
+.results-area table td.actions {
+    white-space: nowrap;
+    width: 80px; /* Giữ chiều rộng cố định */
+}
+
+.results-area table td.actions a,
+.results-area table td.actions .delete-icon {
+    font-size: 0.9em;
+    margin-right: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s ease; /* Giữ hiệu ứng hover đơn giản */
+}
+.results-area table td.actions a:hover { text-decoration: underline; color: #41a7e8; }
+
+.results-area table td.actions .delete-icon {
+    color: #dc3545;
+}
+.results-area table td.actions .delete-icon:hover {
+    color: #ff7675;
+}
+
+/* Style cho các nút/icon bị disable */
+.actions .disabled {
+    color: #6c757d; /* Màu xám */
+    cursor: not-allowed !important; /* Con trỏ không cho phép */
+    text-decoration: none !important;
+    pointer-events: none; /* Ngăn chặn sự kiện click */
+}
+ .actions .disabled:hover {
+     color: #6c757d !important; /* Giữ màu xám khi hover */
+ }
+
+
+.results-area p {
+    color: #b0b0b0;
+    font-size: 1em;
+}
+
+.results-area .error-message {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Ghi chú về hạn chế */
+.limitation-note {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #4a5662;
+    border-left: 4px solid #ffc107;
+    font-size: 0.9em;
+    color: #e0e0e0;
+}
+
+/* --- Style cho Modal (chung cho tất cả modal) --- */
+.modal {
+   display: none; /* Mặc định ẩn modal */
+   position: fixed; /* Giữ cố định trên toàn màn hình */
+   z-index: 1000; /* Đảm bảo modal hiển thị trên các nội dung khác */
+   left: 0;
+   top: 0;
+   width: 100%; /* Chiều rộng toàn màn hình */
+   height: 100%; /* Chiều cao toàn màn hình */
+   overflow: auto; /* Cho phép cuộn nếu nội dung quá dài */
+   background-color: rgba(0, 0, 0, 0.6); /* Lớp nền mờ màu đen */
+   /* Loại bỏ hiệu ứng mờ dần */
+   /* opacity: 0; */
+   /* transition: none; */
+   /* pointer-events: none; */
+}
+
+/* Định nghĩa trạng thái khi modal hiển thị */
+.modal.show { /* Class 'show' có thể không cần nếu bỏ transition */
+   display: block; /* Chỉ cần hiển thị block */
+   /* opacity: 1; */
+   /* pointer-events: auto; */
+}
+
+.modal-content {
+   background-color: #2d3b45; /* Nền của nội dung modal (tông màu Steam) */
+   margin: 5% auto; /* Căn giữa theo chiều dọc và thêm margin trên dưới */
+   padding: 20px;
+   border: 1px solid #555;
+   border-radius: 8px;
+   width: 80%; /* Chiều rộng của nội dung modal */
+   max-width: 500px; /* Chiều rộng tối đa */
+   position: relative; /* Quan trọng cho nút đóng */
+   color: #e0e0e0; /* Màu chữ sáng */
+}
+
+
+.modal-content h2 {
+   margin-top: 0;
+   color: #1a9fd9;
+   margin-bottom: 20px;
+}
+
+.close-button {
+   color: #aaa;
+   float: right;
+   font-size: 28px;
+   font-weight: bold;
+   position: absolute;
+   top: 10px;
+   right: 15px;
+}
+
+.close-button:hover,
+.close-button:focus {
+   color: #e0e0e0;
+   text-decoration: none;
+   cursor: pointer;
+}
+
+.modal-content form input[type="text"],
+.modal-content form input[type="number"],
+.modal-content form input[type="date"],
+.modal-content form textarea {
+   width: calc(100% - 22px);
+   padding: 10px;
+   margin-bottom: 10px;
+   border: 1px solid #555;
+   border-radius: 4px;
+   background-color: #3a4752;
+   color: #e0e0e0;
+   font-size: 1em;
+}
+
+.modal-content form button[type="submit"],
+.modal-content form .cancel-button {
+   padding: 10px 20px;
+   margin-right: 10px;
+   border: none;
+   border-radius: 4px;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+   font-size: 1em;
+}
+
+.modal-content form button[type="submit"] {
+   background-color: #28a745;
+   color: white;
+}
+
+.modal-content form button[type="submit"]:hover {
+   background-color: #218838;
+}
+
+.modal-content form .cancel-button {
+   background-color: #6c757d;
+   color: white;
+}
+
+.modal-content form .cancel-button:hover {
+   background-color: #5a6268;
+}
+
+/* Media query cho màn hình nhỏ */
+@media (max-width: 768px) {
+   body {
+       padding: 10px;
+   }
+   .container {
+       max-width: 100%;
+   }
+    .content-section { /* Tên chung */
+        padding: 15px;
+    }
+    .content-section form input[type="text"],
+    .content-section form input[type="date"],
+    .content-section form input[type="number"],
+    .content-section form select,
+    .content-section form textarea {
+        width: calc(100% - 20px);
+    }
+     .results-area table th,
+      .results-area table td {
+          padding: 6px;
+      }
+      .results-area table { /* Cho phép bảng cuộn ngang trên màn hình nhỏ */
+          overflow-x: auto;
+          display: block;
+      }
+      .results-area table th, .results-area table td {
+           white-space: nowrap; /* Giữ nowrap trong ô khi cuộn */
+      }
+      .results-area table td.actions {
+           min-width: 80px; /* Đảm bảo đủ rộng */
+      }
+
+}

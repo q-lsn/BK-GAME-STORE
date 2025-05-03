@@ -12,12 +12,12 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM GAMES WHERE game_name = @GameName)
         THROW 50000, 'Game not found.', 1;
 
-	SELECT ISNULL(user_name, '[Deleted Account]') AS user_name, comment, rating_score
+	SELECT r.review_id, ISNULL(u.user_name, '[Deleted Account]') AS user_name, r.comment, r.rating_score
 	FROM(
-		GAMES JOIN REVIEWS ON game_id = game_review
-		LEFT JOIN [USER] ON feedback_user = account_id
+		GAMES g JOIN REVIEWS r ON g.game_id = r.game_review
+		LEFT JOIN [USER] u ON r.feedback_user = u.account_id
 	)
-	WHERE game_name = @GameName AND rating_score >= @MinimumScore
-	ORDER BY rating_score DESC;
+	WHERE g.game_name = @GameName AND rating_score >= @MinimumScore
+	ORDER BY r.rating_score DESC;
 	PRINT 'Comment filtering sucessfully.';
 END;

@@ -1,158 +1,55 @@
 <!DOCTYPE html>
-<html lang="vi"> <head>
-    <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Trang Chủ - Hệ Cơ Sở Dữ Liệu</title>
-
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Hệ Cơ Sở Dữ Liệu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
     <style>
-        /* --- Các style cụ thể cho home.html --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font chữ hiện đại, dễ đọc */
-            background-color: #1a202a; /* Nền màu tối */
-            color: #e0e0e0; /* Màu chữ sáng */
-            margin: 0; /* Xóa margin mặc định của body */
-            padding: 0;
-            display: flex; /* Sử dụng flexbox để căn giữa nội dung */
-            flex-direction: column; /* Sắp xếp các item theo cột */
-            align-items: center; /* Căn giữa theo chiều ngang */
-            justify-content: center; /* Căn giữa theo chiều dọc */
-            min-height: 100vh; /* Chiều cao tối thiểu bằng chiều cao viewport */
-            position: relative; /* Để video nền có thể định vị tương đối */
-            overflow: hidden; /* Ngăn chặn nội dung tràn ra ngoài */
+        /* Styles cụ thể cho home.html */
+        .button-container {
+            display: flex;
+            gap: 20px; /* Space between buttons */
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+            justify-content: center; /* Center buttons within the container */
         }
 
-        .container {
-            text-align: center;
-            background-color: #2d3b45; /* Nền tối hơn cho container */
-            padding: 40px; /* Padding bên trong container */
-            border-radius: 8px; /* Góc bo tròn */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Đổ bóng đậm hơn */
-            z-index: 1; /* Đảm bảo nội dung nổi lên trên video */
-            position: relative; /* Quan trọng cho z-index */
+        /* Media query for smaller screens */
+        @media (max-width: 600px) {
+            .button-container {
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: stretch; /* Stretch buttons to fill container */
+            }
+
+            .button-container .button-link { /* Sử dụng class button-link */
+                 text-align: center; /* Center text inside stretched button */
+            }
+        }
+         /* Center align content on home page */
+         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            padding: 50px; /* Thêm padding */
+            text-align: center; /* Center align content */
         }
 
         h1 {
-            color: #1a9fd9; /* Màu tiêu đề */
-            margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+             margin-bottom: 30px;
         }
-
-        .logo {
-            max-width: 250px; /* Giới hạn kích thước logo */
-            height: auto;
-            margin-bottom: 30px; /* Khoảng cách dưới logo */
-        }
-
-        .slogan {
-            font-size: 1.3em; /* Kích thước chữ slogan lớn hơn */
-            color: #b0b0b0; /* Màu xám nhạt hơn cho slogan */
-            margin-bottom: 40px; /* Khoảng cách dưới slogan */
-            font-style: italic; /* In nghiêng slogan */
-        }
-
-        .button-container {
-            margin-top: 20px;
-        }
-
-        .button-container a {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 25px; /* Padding cho nút */
-            font-size: 1em; /* Kích thước chữ nút */
-            text-decoration: none;
-            color: white;
-            background: linear-gradient(to bottom, #41a7e8, #1a9fd9); /* Màu gradient xanh Steam */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease; /* Hiệu ứng chuyển màu nền và transform */
-             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Đổ bóng cho nút */
-        }
-
-        .button-container a:hover {
-            background: linear-gradient(to bottom, #1a9fd9, #41a7e8); /* Đảo gradient khi hover */
-            transform: translateY(-3px); /* Nâng nhẹ nút lên */
-        }
-         .button-container a:active {
-             transform: translateY(0); /* Trở lại vị trí cũ khi nhấp */
-         }
-
-
-        /* --- Style cho video nền --- */
-         .background-video-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 12.5%; /* Chiều rộng video (đã giảm một nửa) */
-            height: auto;
-            overflow: hidden;
-            border-radius: 8px; /* Góc bo tròn cho video */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Đổ bóng cho video */
-            z-index: 0; /* Đảm bảo container nội dung nổi lên trên video */
-            opacity: 0.7; /* Làm mờ video một chút */
-        }
-
-        .background-video-container video {
-             width: 100%;
-             height: auto;
-             display: block; /* Loại bỏ khoảng trắng dưới video */
-        }
-
-
-         /* Media query cho các thiết bị nhỏ hơn */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 20px;
-            }
-            .logo {
-                max-width: 150px;
-                margin-bottom: 20px;
-            }
-             h1 {
-                 font-size: 1.8em;
-                 margin-bottom: 15px;
-             }
-             .slogan {
-                font-size: 1em;
-                margin-bottom: 20px;
-            }
-             .button-container a {
-                padding: 10px 20px;
-                font-size: 0.9em;
-                margin: 5px; /* Giảm khoảng cách giữa các nút trên màn hình nhỏ */
-            }
-             .background-video-container {
-                bottom: 10px;
-                right: 10px;
-                width: 20%; /* Điều chỉnh kích thước video trên màn hình nhỏ */
-            }
-        }
-
     </style>
 </head>
 <body>
+    <h1>Chào mừng đến với Hệ Cơ Sở Dữ Liệu STEAM</h1>
 
-    <div class="container">
-        <h1>Chào mừng đến với Ứng dụng Quản lý Cơ sở dữ liệu</h1>
+    <div class="button-container">
+        <a href="{{ url_for('list_data') }}" class="button-link">Xem Danh Sách Game</a>
 
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Web Logo" class="logo">
-        <p class="slogan">
-            Ở đây chúng tôi có mọi tựa game mà bạn mong muốn, cứ việc mua game còn việc của chúng tôi là bào cái ví của các bạn.
-        </p>
+        <a href="{{ url_for('procedures_demo') }}" class="button-link">Demo Gọi Thủ Tục</a> {# Sử dụng class button-link #}
 
-        <div class="button-container">
-            <a href="{{ url_for('list_data') }}">Xem Danh Sách Dữ Liệu</a>
-            
-            <a href="{{ url_for('functions_demo') }}">Demo Gọi Hàm SQL</a>
-            </div>
+        <a href="{{ url_for('functions_demo') }}" class="button-link">Demo Gọi Hàm SQL</a>
     </div>
-
-
-    <div class="background-video-container">
-        <video autoplay loop muted playsinline>
-            <source src="{{ url_for('static', filename='video.mp4') }}" type="video/mp4">
-            Trình duyệt của bạn không hỗ trợ thẻ video.
-        </video>
-    </div>
-    </body>
+</body>
 </html>
