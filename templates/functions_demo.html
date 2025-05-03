@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Gọi Hàm SQL</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* --- Các style chung cho các trang (có thể copy từ index.html hoặc home.html) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a202a; /* Nền màu tối */
+            color: #e0e0e0; /* Màu chữ sáng */
+            margin: 0;
+            padding: 20px; /* Thêm padding cho body */
+            line-height: 1.6; /* Tăng khoảng cách dòng */
+        }
+
+         h1, h2, h3 {
+             color: #1a9fd9; /* Màu xanh Steam cho tiêu đề */
+         }
+
+         a {
+             color: #1a9fd9; /* Màu xanh Steam cho link */
+             text-decoration: none;
+         }
+         a:hover {
+             text-decoration: underline;
+         }
+
+        /* Style cho flash messages */
+        .flashes {
+             list-style: none;
+             padding: 0;
+             margin: 10px auto; /* Căn giữa */
+             max-width: 1000px; /* Giới hạn chiều rộng */
+             text-align: center;
+        }
+
+        .flashes li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            opacity: 1; /* Mặc định hiển thị rõ */
+            transition: opacity 0.5s ease; /* Hiệu ứng mờ dần */
+        }
+         /* Class cho thông báo mờ dần */
+        .flashes li.fade-out {
+             opacity: 0;
+         }
+
+        .success {
+            background-color: #28a745; /* Xanh lá */
+            color: white;
+        }
+
+        .warning {
+            background-color: #ffc107; /* Vàng */
+            color: #333;
+        }
+
+        .danger {
+            background-color: #dc3545; /* Đỏ */
+            color: white;
+        }
+
+        /* --- Style riêng cho trang demo hàm --- */
+        .container {
+            max-width: 1000px; /* Giới hạn chiều rộng nội dung */
+            margin: 0 auto; /* Căn giữa */
+        }
+
+        .function-section {
+            background-color: #2d3b45; /* Nền tối hơn cho mỗi phần hàm */
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+         .function-section h2 {
+             margin-top: 0;
+             border-bottom: 1px solid #3a4752; /* Đường kẻ dưới tiêu đề */
+             padding-bottom: 10px;
+             margin-bottom: 20px;
+         }
+
+         .function-section form label {
+             display: block;
+             margin-bottom: 5px;
+             color: #b0b0b0;
+         }
+
+         .function-section form input[type="text"],
+         .function-section form input[type="date"] {
+             width: calc(100% - 22px); /* Trừ padding và border */
+             padding: 10px;
+             margin-bottom: 15px;
+             border: 1px solid #555;
+             border-radius: 4px;
+             background-color: #3a4752;
+             color: #e0e0e0;
+             font-size: 1em;
+         }
+
+          .function-section form button[type="submit"] {
+              padding: 10px 20px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              background-color: #28a745; /* Xanh lá */
+              color: white;
+              font-size: 1em;
+              transition: background-color 0.3s ease;
+          }
+
+           .function-section form button[type="submit"]:hover {
+               background-color: #218838;
+           }
+
+          .results-area {
+              margin-top: 20px;
+              padding-top: 15px;
+              border-top: 1px dashed #3a4752; /* Đường kẻ đứt phân cách */
+          }
+
+           .results-area h3 {
+               margin-top: 0;
+               color: #ffc107; /* Màu vàng */
+               font-size: 1.1em;
+           }
+
+           /* Style cho bảng kết quả của Hàm 2 */
+           .results-area table {
+               width: 100%;
+               border-collapse: collapse; /* Xóa khoảng cách giữa các border */
+               margin-top: 15px;
+               font-size: 0.9em;
+           }
+
+            .results-area table th,
+            .results-area table td {
+                border: 1px solid #555;
+                padding: 8px;
+                text-align: left;
+            }
+
+             .results-area table th {
+                 background-color: #3a4752; /* Nền header bảng */
+                 color: #e0e0e0;
+             }
+
+             .results-area table tr:nth-child(even) {
+                 background-color: #34404a; /* Màu nền xen kẽ cho hàng */
+             }
+
+             .results-area table tr:hover {
+                 background-color: #4a5662; /* Màu nền khi hover hàng */
+             }
+
+            .results-area p {
+                 color: #b0b0b0; /* Màu chữ cho kết quả dạng text */
+                 font-size: 1em;
+            }
+
+            .results-area .error-message {
+                 color: #dc3545; /* Màu đỏ cho thông báo lỗi */
+                 font-weight: bold;
+            }
+
+
+            /* Style cho link quay lại */
+             .back-link-container {
+                 margin-top: 30px;
+                 text-align: center;
+             }
+
+
+            /* Media query cho màn hình nhỏ */
+             @media (max-width: 768px) {
+                 body {
+                     padding: 10px;
+                 }
+                 .container {
+                     max-width: 100%;
+                 }
+                  .function-section {
+                      padding: 15px;
+                  }
+                  .function-section form input[type="text"],
+                  .function-section form input[type="date"] {
+                      width: calc(100% - 20px); /* Điều chỉnh width */
+                  }
+                   .results-area table th,
+                    .results-area table td {
+                        padding: 6px; /* Giảm padding bảng */
+                    }
+             }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Demo Gọi Hàm SQL</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="function-section">
+            <h2>Hàm CalculateUserSpending (Tổng chi tiêu User)</h2>
+            <p>Tính tổng số tiền mà một người dùng đã chi tiêu trong một khoảng thời gian cụ thể.</p>
+
+            <form action="{{ url_for('functions_demo') }}" method="post">
+                <input type="hidden" name="action" value="call_func1">
+
+                <div>
+                    <label for="func1_user_id">User ID (CHAR(6), ví dụ: UI0001):</label><br>
+                    <input type="text" id="func1_user_id" name="user_id" value="{{ func1_input.user_id if func1_input else '' }}" required>
+                </div>
+
+                <div>
+                    <label for="func1_start_date">Ngày bắt đầu:</label><br>
+                     <input type="date" id="func1_start_date" name="start_date" value="{{ func1_input.start_date if func1_input else '' }}" required>
+                </div>
+
+                <div>
+                    <label for="func1_end_date">Ngày kết thúc:</label><br>
+                    <input type="date" id="func1_end_date" name="end_date" value="{{ func1_input.end_date if func1_input else '' }}" required>
+                </div>
+
+                <button type="submit">Gọi Hàm 1</button>
+            </form>
+
+            {% if func1_result is not none %}
+            <div class="results-area">
+                <h3>Kết quả:</h3>
+                 {% if func1_result.error %}
+                    <p class="error-message">Lỗi: {{ func1_result.error }}</p>
+                {% elif func1_result.success %}
+                    <p>Tổng chi tiêu: {{ func1_result.total_spending | default(0.00) }}</p>
+                {% else %}
+                     <p>Không có kết quả.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="function-section">
+            <h2>Hàm CalculateAvrgReviewScore (Điểm đánh giá trung bình Game)</h2>
+             <p>Tính toán điểm đánh giá trung bình, số lượng và phân loại đánh giá cho một game.</p>
+
+            <form action="{{ url_for('functions_demo') }}" method="post">
+                <input type="hidden" name="action" value="call_func2">
+
+                <div>
+                    <label for="func2_game_id">Game ID (CHAR(6), ví dụ: GA0001):</label><br>
+                     <input type="text" id="func2_game_id" name="game_id" value="{{ func2_input.game_id if func2_input else '' }}" required>
+                </div>
+
+                <button type="submit">Gọi Hàm 2</button>
+            </form>
+
+             {% if func2_result is not none %}
+            <div class="results-area">
+                <h3>Kết quả:</h3>
+                {% if func2_result.error %}
+                    <p class="error-message">Lỗi: {{ func2_result.error }}</p>
+                {% elif func2_result.success and func2_result.results %}
+                     <table>
+                         <thead>
+                             <tr>
+                                 {% for col in func2_result.results[0].keys() %}
+                                     <th>{{ col }}</th>
+                                 {% endfor %}
+                             </tr>
+                         </thead>
+                         <tbody>
+                             {% for row in func2_result.results %}
+                                 <tr>
+                                     {% for value in row.values() %}
+                                         <td>{{ value | default('N/A') }}</td>
+                                     {% endfor %}
+                                 </tr>
+                             {% endfor %}
+                         </tbody>
+                     </table>
+                {% else %}
+                     <p>Không có kết quả được trả về từ hàm.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="back-link-container">
+            <a href="{{ url_for('index') }}">Quay lại Trang Chủ</a>
+        </div>
+
+    </div>
+
+     <script>
+         window.addEventListener('load', function() {
+            const flashMessages = document.querySelectorAll('.flashes li');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.classList.add('fade-out');
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+
+</body>
+</html>

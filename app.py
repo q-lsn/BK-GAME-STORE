@@ -284,6 +284,137 @@ def delete_game_api():
         if cursor: cursor.close()
         if conn: conn.close()
 
+
+# --- Route mới cho trang demo gọi hàm SQL ---
+@app.route('/functions_demo', methods=['GET', 'POST'])
+def functions_demo():
+    """Render trang demo hàm SQL và xử lý gọi hàm."""
+    conn = get_db_connection()
+    if not conn:
+         # Nếu không kết nối được CSDL, chỉ render trang trống với thông báo lỗi từ flash
+         # Pass None cho kết quả và input values để template không cố gắng hiển thị chúng
+         return render_template('functions_demo.html',
+                                func1_result=None, func2_result=None,
+                                func1_input=None, func2_input=None)
+
+    cursor = conn.cursor()
+    func1_result = None # Kết quả cho hàm CalculateUserSpending
+    func2_result = None # Kết quả cho hàm CalculateAvrgReviewScore
+    func1_input_values = None # Giá trị input cho hàm 1 để hiển thị lại trên form
+    func2_input_values = None # Giá trị input cho hàm 2 để hiển thị lại trên form
+
+
+    if request.method == 'POST':
+        action = request.form.get('action') # Xác định form nào được submit
+
+        if action == 'call_func1':
+            # --- Xử lý gọi Hàm CalculateUserSpending ---
+            user_id = request.form.get('user_id', '').strip()
+            start_date_str = request.form.get('start_date', '').strip()
+            end_date_str = request.form.get('end_date', '').strip()
+
+            func1_input_values = {'user_id': user_id, 'start_date': start_date_str, 'end_date': end_date_str} # Lưu input để hiển thị lại
+
+            # Validate và chuyển đổi kiểu dữ liệu
+            if not user_id:
+                 flash('Vui lòng nhập User ID cho Hàm 1.', 'warning')
+            else:
+                 try:
+                      # Chuyển đổi chuỗi ngày sang đối tượng date
+                      start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
+                      end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+
+                      # --- Gọi Hàm SQL CalculateUserSpending ---
+                      # Hàm trả về một giá trị scalar
+                      # Các mã lỗi: -1.01 User không tồn tại, -1.02 Wallet không kích hoạt, -1.03 Ngày không hợp lệ
+                      sql_call = "SELECT dbo.CalculateUserSpending(?, ?, ?)"
+                      params = (user_id, start_date, end_date)
+
+                      cursor.execute(sql_call, params)
+                      # Hàm vô hướng trả về một hàng với một cột
+                      result_row = cursor.fetchone()
+
+                      if result_row:
+                           func1_result_value = result_row[0] # Lấy giá trị từ cột đầu tiên
+                           # Kiểm tra các mã lỗi đặc biệt
+                           if func1_result_value == -1.01:
+                               func1_result = {'error': 'User không tồn tại.'}
+                           elif func1_result_value == -1.02:
+                                func1_result = {'error': 'User chưa kích hoạt WALLET.'}
+                           elif func1_result_value == -1.03:
+                                func1_result = {'error': 'Ngày bắt đầu không thể sau ngày kết thúc.'}
+                           else:
+                                func1_result = {'success': True, 'total_spending': func1_result_value} # Kết quả thành công
+
+                      else:
+                          func1_result = {'error': 'Hàm không trả về kết quả.'} # Trường hợp không mong đợi
+
+                 except ValueError:
+                      flash('Định dạng ngày không hợp lệ cho Hàm 1.', 'danger')
+                      func1_result = {'error': 'Định dạng ngày không hợp lệ.'}
+                 except pyodbc.Error as err:
+                      print(f"Error calling CalculateUserSpending: {err}")
+                      flash(f'Lỗi CSDL khi gọi Hàm 1: {str(err)}', 'danger')
+                      func1_result = {'error': f'Lỗi CSDL: {str(err)}'}
+
+
+        elif action == 'call_func2':
+             # --- Xử lý gọi Hàm CalculateAvrgReviewScore ---
+             game_id = request.form.get('game_id', '').strip()
+             func2_input_values = {'game_id': game_id} # Lưu input để hiển thị lại
+
+             if not game_id:
+                  flash('Vui lòng nhập Game ID cho Hàm 2.', 'warning')
+             else:
+                  try:
+                       # --- Gọi Hàm SQL CalculateAvrgReviewScore ---
+                       # Hàm trả về một bảng (Table-Valued Function)
+                       sql_call = "SELECT * FROM dbo.CalculateAvrgReviewScore(?)"
+                       params = (game_id,)
+
+                       cursor.execute(sql_call, params)
+                       # Hàm trả về bảng, fetchall sẽ lấy tất cả các hàng
+                       result_rows = cursor.fetchall()
+
+                       if result_rows:
+                            # Lấy tên cột từ cursor description
+                           column_names = [column[0] for column in cursor.description]
+                           # Chuyển đổi kết quả sang list of dictionaries để dễ dàng hiển thị trong template
+                           func2_result_list = [dict(zip(column_names, row)) for row in result_rows]
+
+                           # Kiểm tra trường hợp lỗi từ hàm (dòng đầu tiên có GameID = 0)
+                           if func2_result_list[0].get('GameID') == '0':
+                                # Dòng lỗi đặc biệt từ hàm
+                                func2_result = {'error': func2_result_list[0].get('GameName')} # Sử dụng GameName làm thông báo lỗi
+                           else:
+                                func2_result = {'success': True, 'results': func2_result_list} # Kết quả thành công
+
+                       else:
+                            # Hàm không trả về hàng nào (có thể xảy ra nếu có lỗi hoặc không có đánh giá sau validate nội bộ)
+                            # Dựa trên logic hàm bạn gửi, nó luôn trả về ít nhất 1 hàng, kể cả lỗi hoặc không có đánh giá.
+                            # Trường hợp này ít xảy ra nếu hàm đúng như script bạn gửi.
+                            func2_result = {'error': 'Hàm không trả về dữ liệu bảng.'}
+
+                  except pyodbc.Error as err:
+                       print(f"Error calling CalculateAvrgReviewScore: {err}")
+                       flash(f'Lỗi CSDL khi gọi Hàm 2: {str(err)}', 'danger')
+                       func2_result = {'error': f'Lỗi CSDL: {str(err)}'}
+
+        # Nếu không có action hoặc action không hợp lệ, không làm gì cả, chỉ hiển thị form trống (hoặc với input values cũ)
+
+
+    # Đóng kết nối CSDL sau khi xử lý xong POST hoặc nếu là GET request
+    if cursor: cursor.close()
+    if conn: conn.close()
+
+    # Render template demo, truyền kết quả và giá trị input cũ
+    return render_template('functions_demo.html',
+                           func1_result=func1_result,
+                           func2_result=func2_result,
+                           func1_input=func1_input_values,
+                           func2_input=func2_input_values)
+
+
 # --- Phần chạy ứng dụng ---
 if __name__ == '__main__':
     # Chạy ứng dụng Flask ở chế độ debug
