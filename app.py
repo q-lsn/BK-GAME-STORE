@@ -1,34 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import pyodbc
-import os
 from datetime import datetime, date
 
 # --- Cấu hình ứng dụng Flask ---
 app = Flask(__name__)
-# Secret key cần thiết cho flash messages và session.
-# Nên lấy từ biến môi trường và đặt một giá trị mặc định an toàn và duy nhất trong môi trường production.
-app.secret_key = os.getenv('SECRET_KEY', 'a_very_secret_and_unique_fallback_key_replace_this')
+app.secret_key = 'wqphfk1h'
 
 # --- Cấu hình kết nối Cơ sở dữ liệu SQL Server ---
 # Thay thế các giá trị trong chuỗi kết nối bằng thông tin CSDL của bạn.
 # Đảm bảo tên DRIVER khớp chính xác với tên driver bạn đã cài đặt (kiểm tra bằng odbcad32.exe).
 # Đảm bảo SERVER, DATABASE, UID, PWD là chính xác.
 # Nếu dùng Windows Authentication, dùng: 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=your_server_name;DATABASE=STEAM_PROJECT;Trusted_Connection=yes;'
-db_config = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=TEST;UID=sa;PWD=270205'
+db_config = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=DESKTOP-7175T46;DATABASE=STEAM_PROJECT;UID=sa;PWD=270205'
 
 def get_db_connection():
     """Thiết lập và trả về kết nối đến cơ sở dữ liệu."""
     conn = None
     try:
-        # pyodbc.connect có thể cần thêm tham số encoding='utf-8' tùy cấu hình
         conn = pyodbc.connect(db_config)
         return conn
     except pyodbc.Error as err:
         print(f"Database connection error: {err}")
-        # Đối với API routes, trả về lỗi JSON sẽ phù hợp hơn flash message.
-        # Flash message chỉ phù hợp khi redirect hoặc render template thông thường.
-        # flash(f"Database connection error: {err}", 'error')
-        return None # Trả về None nếu kết nối thất bại
+        return None
 
 # --- Route mới cho Trang Chủ ---
 @app.route('/')
@@ -39,108 +32,28 @@ def index():
 # --- Route cho Trang Hiển Thị Danh Sách Dữ Liệu (Game) ---
 @app.route('/data', methods=['GET'])
 def list_data():
-    """Lấy và hiển thị danh sách game với tìm kiếm và sắp xếp."""
     conn = get_db_connection()
-    data = [] # Danh sách dữ liệu game sẽ được truyền đến template
-    # Lấy tham số tìm kiếm và sắp xếp từ URL query string
-    search_query = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort_by', 'game_name') # Mặc định sắp xếp theo tên game
-
-    # Kiểm tra tên cột sắp xếp có hợp lệ không để tránh SQL Injection
-    allowed_sort_columns = ['game_name', 'date_released', 'game_price'] # Thêm các cột khác bạn muốn cho phép sắp xếp
-    if sort_by not in allowed_sort_columns:
-        sort_by = 'game_name' # Đặt lại mặc định nếu giá trị không hợp lệ
-
-
+    data = []
     if conn:
         cursor = conn.cursor()
         try:
-            # --- Gọi thủ tục lưu trữ để lấy danh sách Game ---
-            # Bạn cần tạo thủ tục `GetGamesFilteredSorted` trong SQL Server.
-            # Thủ tục này phải nhận 2 tham số: @SearchQuery VARCHAR(100) và @SortByColumn VARCHAR(50).
-            # Nó nên thực hiện JOIN với bảng PUBLISHER để lấy tên nhà phát hành.
-            # Câu SELECT trong thủ tục phải trả về các cột game_id, game_name, game_price, engine, game_description, tên publisher (alias), date_released theo đúng thứ tự.
-            sql_call_sp = "{CALL GetGamesFilteredSorted(?, ?)}"
-            cursor.execute(sql_call_sp, (search_query, sort_by))
-            data = cursor.fetchall() # Lấy tất cả các hàng kết quả
+            cursor.execute("{CALL GetGamesFilteredSorted}")
+            data = cursor.fetchall()
 
         except pyodbc.Error as err:
             print(f"Error executing query/stored procedure for game list: {err}")
-            # Hiển thị thông báo lỗi trên giao diện người dùng
             flash(f'Could not retrieve game list data: {str(err)}', 'danger')
         finally:
-            # Đảm bảo cursor và kết nối được đóng
             if cursor: cursor.close()
             if conn: conn.close()
     else:
-         # Xử lý lỗi kết nối CSDL
          flash('Could not connect to the database.', 'error')
 
-    # Render template hiển thị danh sách game và truyền dữ liệu cùng tham số tìm kiếm/sắp xếp
-    return render_template('index.html', data=data, search_query=search_query, sort_by=sort_by)
-
-# --- Route API để lấy dữ liệu chi tiết của 1 Game theo ID ---
-# Endpoint này được gọi bằng AJAX từ index.html khi nhấp Sửa
-@app.route('/api/games/<string:game_id>', methods=['GET'])
-def get_game_api(game_id):
-     """Lấy dữ liệu chi tiết của một game theo ID và trả về dưới dạng JSON."""
-     conn = get_db_connection()
-     if not conn:
-          # Trả về lỗi JSON nếu không kết nối được CSDL
-          return jsonify({'success': False, 'error': 'Could not connect to the database.'}), 500
-
-     # Sử dụng pyodbc.Row factory để dễ dàng truy cập dữ liệu cột bằng tên
-     # Cần cấu hình row_factory sau khi kết nối hoặc khi tạo cursor
-     # Cách khác là lấy tên cột từ cursor.description sau khi execute và tạo dictionary thủ công
-     # Let's use the manual dictionary creation approach for broader compatibility
-     cursor = conn.cursor()
-     game_dict = None # Dictionary để lưu dữ liệu game
-
-     try:
-         # Câu lệnh SQL để lấy dữ liệu game theo ID
-         # JOIN với bảng PUBLISHER để lấy tên nhà phát hành
-         # Đảm bảo tên bảng GAMES, PUBLISHER và tên cột khớp với schema của bạn
-         sql_select = """
-         SELECT g.game_id, g.game_name, g.game_price, g.engine, g.game_description, p.name AS publisher_name, g.date_released
-         FROM GAMES g
-         LEFT JOIN PUBLISHER p ON g.game_publisher = p.publisher_id
-         WHERE g.game_id = ?
-         """
-         cursor.execute(sql_select, (game_id,))
-         game_row = cursor.fetchone() # Lấy một hàng duy nhất
-
-         if game_row:
-              # Lấy tên cột từ cursor description
-             column_names = [column[0] for column in cursor.description]
-              # Tạo dictionary từ tên cột và dữ liệu hàng
-             game_dict = dict(zip(column_names, game_row))
-
-             # Chuyển đổi đối tượng date/datetime sang string định dạng YYYY-MM-DD cho input type="date"
-             if game_dict.get('date_released') and isinstance(game_dict['date_released'], (datetime, date)):
-                 game_dict['date_released'] = game_dict['date_released'].strftime('%Y-%m-%d')
-             else:
-                 game_dict['date_released'] = None # Đảm bảo là None hoặc chuỗi rỗng nếu không có ngày
-
-             # Trả về dữ liệu game dưới dạng JSON thành công
-             return jsonify({'success': True, 'game': game_dict})
-         else:
-             # Trả về lỗi JSON nếu không tìm thấy game
-             return jsonify({'success': False, 'error': 'Game not found.'}), 404 # HTTP status 404 Not Found
-
-     except pyodbc.Error as err:
-         print(f"Error fetching game data (API): {err}")
-         # Trả về lỗi JSON nếu có lỗi CSDL khi lấy dữ liệu
-         return jsonify({'success': False, 'error': 'Error fetching game data.'}), 500 # HTTP status 500 Internal Server Error
-     finally:
-         if cursor: cursor.close()
-         if conn: conn.close()
+    return render_template('index.html', data=data)
 
 # --- Route API để xử lý thêm game bằng AJAX API ---
-# Nhận POST request từ form thêm mới trong modal
 @app.route('/api/add_game', methods=['POST'])
 def add_game_api():
-    """Xử lý thêm game mới bằng cách gọi thủ tục InsertGame và trả về JSON."""
-    # Lấy dữ liệu từ form gửi qua AJAX (FormData)
     g_name = request.form.get('g_name', '').strip()
     g_price_str = request.form.get('g_price', '').strip()
     g_engine = request.form.get('g_engine', '').strip()
@@ -149,9 +62,7 @@ def add_game_api():
     released_str = request.form.get('released', '').strip()
 
     # --- Validate dữ liệu cơ bản ở backend ---
-    # Nên validate các trường bắt buộc sớm
     if not g_name or not g_publisher:
-         # Trả về JSON báo lỗi nếu validate thất bại
         return jsonify({'success': False, 'error': 'Game Name and Publisher Name are required.'}), 400
 
     # Validate và chuyển đổi giá
@@ -172,11 +83,7 @@ def add_game_api():
         except ValueError:
              return jsonify({'success': False, 'error': 'Invalid release date format. Please use YYYY-MM-DD.'}), 400
 
-    # Chuẩn bị giá trị cho các tham số có giá trị mặc định trong SP
-    # Truyền None hoặc chuỗi rỗng sẽ tùy thuộc vào cách SP xử lý ISNULL và default
-    # Dựa trên SP InsertGame, nó có default values và IS NULL check cho @Released
-    # Nó không dùng ISNULL cho các tham số khác, nên nếu bạn truyền '', nó sẽ insert ''.
-    # Let's align with SP parameters.
+
     g_engine_for_sp = g_engine if g_engine else 'Source' # Gán giá trị mặc định ở Python
     g_description_for_sp = g_description if g_description else 'No description.' # Gán giá trị mặc định ở Python
 
@@ -188,7 +95,6 @@ def add_game_api():
     cursor = conn.cursor()
     try:
         # --- Gọi thủ tục lưu trữ InsertGame ---
-        # Đảm bảo tên thủ tục và số lượng/thứ tự/kiểu tham số khớp chính xác
         sql_call = "{CALL InsertGame(?, ?, ?, ?, ?, ?)}"
         params = (
             g_name,
@@ -196,7 +102,7 @@ def add_game_api():
             g_engine_for_sp,
             g_description_for_sp,
             g_publisher,
-            released_date # pyodbc sẽ chuyển Python date/None sang SQL date/NULL
+            released_date 
         )
 
         cursor.execute(sql_call, params)
@@ -212,37 +118,27 @@ def add_game_api():
     except pyodbc.ProgrammingError as err:
         print(f"Database error calling InsertGame (API): {err}")
         error_message = str(err)
-        user_error_message = 'An unexpected database error occurred.' # Thông báo lỗi chung mặc định
-
-        # Kiểm tra các thông báo lỗi cụ thể từ thủ tục SQL Server
-        # Dựa vào cách thủ tục THROW lỗi (trước hoặc trong TRY/CATCH)
+        # Kiểm tra các thông báo lỗi cụ thể từ thủ tục InsertGame
         if 'Cannot set release date to a future date.' in error_message:
-             user_error_message = 'Error: Release date cannot be in the future.'
+             return jsonify({'success': False, 'error': 'Lỗi: Ngày phát hành không thể trong tương lai.'}), 400
         elif 'Publisher not found.' in error_message:
-             user_error_message = 'Error: Publisher not found. Please check the publisher name.'
+             return jsonify({'success': False, 'error': 'Lỗi: Nhà phát hành không tồn tại.'}), 400
         elif 'Game already exists.' in error_message:
-             user_error_message = 'Error: A game with this name already exists.'
-        elif 'Price cannot be negative.' in error_message: # Mặc dù đã validate ở Python, lỗi từ SP vẫn có thể xảy ra
-             user_error_message = 'Error: Price cannot be negative.'
-        elif 'Failed to insert game.' in error_message: # Thông báo lỗi từ CATCH cuối cùng trong SP
-             user_error_message = 'Failed to add game due to an internal database error.'
+             return jsonify({'success': False, 'error': 'Lỗi: Game đã tồn tại.'}), 400
+        elif 'Price cannot be negative.' in error_message: # Mặc dù đã validate ở Python
+             return jsonify({'success': False, 'error': 'Lỗi: Giá không thể âm.'}), 400
+        elif 'Failed to insert game.' in error_message: # Lỗi từ CATCH cuối cùng
+             return jsonify({'success': False, 'error': 'Thêm game thất bại do lỗi nội bộ.'}), 500
         else:
-            # Nếu có lỗi khác không được bắt bởi các kiểm tra trên
-            user_error_message = f'A database error occurred: {error_message}'
-
-        conn.rollback() # Hoàn tác thay đổi
-        # Trả về JSON báo lỗi cùng thông báo lỗi cụ thể
-        return jsonify({'success': False, 'error': user_error_message}), 400 # HTTP status 400 Bad Request cho lỗi nghiệp vụ/validate từ SP
+            return jsonify({'success': False, 'error': f'Lỗi CSDL: {error_message}'}), 500
 
 
     except pyodbc.Error as err:
         print(f"General database error during insert (API): {err}")
         conn.rollback()
-        # Trả về JSON báo lỗi chung cho các lỗi CSDL khác
-        return jsonify({'success': False, 'error': 'A database error occurred during insertion.'}), 500 # HTTP status 500 Internal Server Error
+        return jsonify({'success': False, 'error': 'Đã xảy ra lỗi cơ sở dữ liệu khi thêm game.'}), 500
 
     finally:
-        # Đảm bảo cursor và kết nối được đóng
         if cursor: cursor.close()
         if conn: conn.close()
 

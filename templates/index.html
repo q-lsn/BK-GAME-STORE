@@ -386,14 +386,6 @@
     {% endwith %}
 
     <div class="controls-container">
-        <form action="{{ url_for('list_data') }}" method="get">
-            <input type="text" name="search" placeholder="Tìm kiếm theo tên game..." value="{{ search_query }}">
-            <select name="sort_by">
-                <option value="game_name" {{ 'selected' if sort_by == 'game_name' else '' }}>Sắp xếp theo Tên Game</option>
-                <option value="date_released" {{ 'selected' if sort_by == 'date_released' else '' }}>Sắp xếp theo Ngày phát hành</option>
-                 <option value="game_price" {{ 'selected' if sort_by == 'game_price' else '' }}>Sắp xếp theo Giá</option>
-                </select>
-            <button type="submit">Tìm kiếm/Sắp xếp</button>
         </form>
          <a href="#" class="button-link">Thêm Game Mới</a>
     </div>
