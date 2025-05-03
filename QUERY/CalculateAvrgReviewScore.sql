@@ -10,6 +10,7 @@ RETURNS @Result TABLE (
     GameName                VARCHAR(80),
     AverageRaiting          DECIMAL(18, 2),
     TotalsReviews           INT,
+    RatingCategory          VARCHAR(80),
     PositiveReviewPercent   DECIMAL(18, 2)
 )
 AS
@@ -64,6 +65,15 @@ BEGIN
     ELSE 
         SET @AverageRaiting = 0
 
+    DECLARE @Category VARCHAR(80)
+    SET @Category = CASE 
+        WHEN @AverageRaiting >= 8.00 THEN '★★★★★'
+        WHEN @AverageRaiting >= 6.00 THEN '★★★★'
+        WHEN @AverageRaiting >= 4.00 THEN '★★★'
+        WHEN @AverageRaiting >= 2.00 THEN '★★'
+        ELSE '★'
+    END
+
     DECLARE @PositivePercent DECIMAL (18, 2) = 0.00
     IF @ReviewCount > 0
         SET @PositivePercent = (@PositiveReviews * 100.00) / @ReviewCount
@@ -74,6 +84,7 @@ BEGIN
         @GameName,
         @AverageRaiting,
         @ReviewCount,
+        @Category
         @PositivePercent
     )
 
