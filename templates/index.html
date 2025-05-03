@@ -83,42 +83,10 @@
              gap: 15px; /* Khoảng cách giữa các item */
              flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
              align-items: center;
-             justify-content: space-between; /* Căn đều các item */
+             justify-content: flex-start; /* Căn sang trái */
          }
 
-         .controls-container form {
-             display: flex; /* Sử dụng flexbox cho form tìm kiếm/sắp xếp */
-             gap: 10px; /* Khoảng cách giữa các input/select/button */
-             flex-wrap: wrap; /* Cho phép xuống dòng trong form */
-             flex-grow: 1; /* Cho phép form giãn nở */
-             align-items: center;
-         }
-
-         .controls-container input[type="text"],
-         .controls-container select {
-             padding: 8px;
-             border: 1px solid #555;
-             border-radius: 4px;
-             background-color: #3a4752; /* Nền tối cho input */
-             color: #e0e0e0; /* Chữ sáng */
-             font-size: 1em;
-         }
-
-         .controls-container button {
-             padding: 8px 15px;
-             background: linear-gradient(to bottom, #41a7e8, #1a9fd9); /* Màu gradient xanh Steam */
-             color: white;
-             border: none;
-             border-radius: 4px;
-             cursor: pointer;
-             transition: background-color 0.3s ease;
-             font-size: 1em;
-         }
-          .controls-container button:hover {
-             background: linear-gradient(to bottom, #1a9fd9, #41a7e8); /* Đảo gradient khi hover */
-         }
-
-         /* Style cho nút "Thêm Game Mới" trong controls */
+         /* Style cho nút "Thêm Game Mới" */
          .controls-container .button-link {
              display: inline-block;
              padding: 8px 15px;
@@ -155,6 +123,11 @@
             color: #e0e0e0; /* Màu chữ sáng */
             display: flex; /* Sử dụng flexbox cho nội dung card */
             flex-direction: column;
+            /* --- Thêm data attributes cho các trường cần sửa --- */
+            /* Các data attribute này sẽ được JavaScript đọc khi mở modal sửa */
+             /* game_id, game_name, game_price, game_description */
+             /* Các cột khác như engine, publisher, date_released không sửa qua SP UpdateGameInfo,
+             nên không cần nhúng vào data attribute nếu không sửa. Nếu muốn sửa, cần sửa SP */
         }
 
         .game-card:hover {
@@ -194,6 +167,7 @@
             background-color: #3a4752; /* Nền tối hơn cho phần action */
             display: flex;
             justify-content: space-around; /* Căn đều các nút */
+             align-items: center; /* Căn giữa theo chiều dọc */
          }
 
         .card-actions a {
@@ -201,6 +175,7 @@
             text-decoration: none;
             font-size: 0.9em;
             transition: color 0.3s ease; /* Hiệu ứng chuyển màu */
+            cursor: pointer; /* Con trỏ tay cho các link kích hoạt JS/modal */
         }
 
         .card-actions a:hover {
@@ -208,9 +183,22 @@
              text-decoration: underline;
         }
 
+        /* Style cho icon xóa */
+         .card-actions .delete-icon {
+              color: #dc3545; /* Màu đỏ cho icon xóa */
+              cursor: pointer; /* Biểu tượng con trỏ tay */
+              font-size: 1em; /* Kích thước icon */
+              transition: color 0.3s ease; /* Hiệu ứng chuyển màu */
+              margin-left: 10px; /* Khoảng cách với link sửa */
+         }
+          .card-actions .delete-icon:hover {
+              color: #ff7675; /* Màu đỏ nhạt hơn khi hover */
+          }
 
-        /* --- Style cho Modal (Áp dụng cho cả hai modal: #addGameModal, #editGameModal) --- */
-        .modal {
+
+        /* --- Cấu trúc Modal (Áp dụng cho cả hai modal: #addGameModal, #editGameModal) --- */
+        /* Style này cần được copy từ style.css hoặc thêm vào đây */
+         .modal {
             display: none; /* Mặc định ẩn modal */
             position: fixed; /* Giữ cố định trên toàn màn hình */
             z-index: 1000; /* Đảm bảo modal hiển thị trên các nội dung khác */
@@ -319,32 +307,26 @@
             background-color: #5a6268;
         }
 
-         /* Media query cho màn hình nhỏ trong index.html */
+         /* Media query cho màn hình nhỏ */
          @media (max-width: 768px) {
              body {
                  padding: 10px;
              }
              .controls-container {
-                 flex-direction: column; /* Stack controls vertically */
-                 align-items: stretch; /* Stretch items */
+                 flex-direction: column;
+                 align-items: stretch;
              }
-              .controls-container form {
-                  flex-direction: column;
-                  align-items: stretch;
-              }
-             .controls-container input[type="text"],
-             .controls-container select,
-             .controls-container button,
+
              .controls-container .button-link {
-                 width: 100%; /* Full width on small screens */
-                 box-sizing: border-box; /* Include padding and border in width */
+                 width: 100%;
+                 box-sizing: border-box;
              }
              .game-list-grid {
-                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller cards */
+                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                  gap: 10px;
              }
              .game-card img {
-                 height: 100px; /* Smaller image height */
+                 height: 100px;
              }
              .card-content {
                  padding: 10px;
@@ -358,11 +340,12 @@
              .card-actions {
                  padding: 10px;
              }
-             .card-actions a {
-                 font-size: 0.8em;
+             .card-actions a,
+             .card-actions .delete-icon { /* Bao gồm icon xóa */
+                 font-size: 0.9em; /* Giữ kích thước để dễ bấm */
              }
              .modal-content {
-                 width: 90%; /* Wider modal on small screens */
+                 width: 90%;
                  margin: 10% auto;
              }
          }
@@ -386,22 +369,25 @@
     {% endwith %}
 
     <div class="controls-container">
-        </form>
-         <a href="#" class="button-link">Thêm Game Mới</a>
+         <a href="#" class="button-link" id="addGameBtn">Thêm Game Mới</a>
     </div>
 
 
     <div class="game-list-grid">
         {% for row in data %}
-        <div class="game-card">
-            <img src="{{ url_for('static', filename='game_placeholder.png') }}" alt="Game Cover">
-             <div class="card-content">
-                 <h3>{{ row[1] }}</h3> <p><strong>Giá:</strong> {{ row[2] }}</p> <p><strong>Engine:</strong> {{ row[3] }}</p> <p><strong>Nhà phát hành:</strong> {{ row[6] }}</p> <p><strong>Ngày phát hành:</strong> {{ row[7] | default("N/A") }}</p> </div>
+        <div class="game-card"
+             data-game-id="{{ row[0] }}"
+             data-game-name="{{ row[1] }}"
+             data-game-price="{{ row[2] | default('') }}" {# Sử dụng default '' nếu giá là NULL #}
+             data-game-description="{{ row[4] | default('') }}"> {# Sử dụng default '' nếu mô tả là NULL #}
+             <img src="{{ url_for('static', filename='game_placeholder.png') }}" alt="Game Cover">
+
+            <div class="card-content">
+                <h3>{{ row[1] }}</h3> <p><strong>Giá:</strong> {{ row[2] }}</p> <p><strong>Engine:</strong> {{ row[3] }}</p> <p><strong>Nhà phát hành:</strong> {{ row[6] }}</p> <p><strong>Ngày phát hành:</strong> {{ row[7] | default("N/A") }}</p> </div>
 
             <div class="card-actions">
-                <a href="{{ url_for('edit_data', item_id=row[0]) }}" class="edit-link">Sửa</a> |
-                 <a href="{{ url_for('delete_data', item_id=row[0]) }}" onclick="return confirm('Bạn có chắc chắn muốn xóa game {{ row[1] }}?');">Xóa</a>
-            </div>
+                <a href="#" class="edit-link">Sửa</a> |
+                 <span class="delete-icon" data-game-id="{{ row[0] }}">&times;</span> </div>
         </div>
         {% else %}
         <p style="max-width: 1200px; margin: 20px auto; text-align: center; color: #b0b0b0;">Không tìm thấy game nào phù hợp.</p>
@@ -422,7 +408,7 @@
 
                 <div>
                     <label for="g_price">Price:</label><br>
-                    <input type="text" id="g_price" name="g_price">
+                    <input type="text" id="g_price" name="g_price"> {# Price có thể nhập số thập phân #}
                 </div>
                 <br>
 
@@ -440,7 +426,7 @@
 
                  <div>
                     <label for="g_publisher">Publisher Name:</label><br>
-                    <input type="text" id="g_publisher" name="g_publisher" required>
+                    <input type="text" id="g_publisher" name="g_publisher" required> {# SP cần tên Publisher #}
                 </div>
                 <br>
 
@@ -491,162 +477,105 @@
         // --- Lấy các phần tử DOM cho cả hai Modal ---
         // Modal Thêm Mới
         var addModal = document.getElementById("addGameModal");
-        var addBtn = document.querySelector(".controls-container a.button-link"); // Chọn dựa vào class .button-link
-        var addCloseSpan = addModal.querySelector(".close-button");
+        var addBtn = document.getElementById("addGameBtn"); // Lấy theo ID mới
+        var addCloseSpan = addModal.querySelector(".close-button"); // Lấy theo class hoặc trực tiếp
         var addCancelButton = addModal.querySelector(".cancel-button");
         var addForm = document.getElementById("addGameForm");
 
          // Modal Sửa
         var editModal = document.getElementById("editGameModal");
-        // Nút đóng (X) và nút Hủy của modal sửa
         var editCloseSpan = editModal.querySelector(".close-button");
         var editCancelButton = editModal.querySelector(".cancel-button");
         var editForm = document.getElementById("editGameForm");
-        // Các input trong form sửa
         var editGameIdInput = document.getElementById("edit_game_id");
         var editGameNameInput = document.getElementById("edit_g_name");
         var editGamePriceInput = document.getElementById("edit_g_price");
         var editGameDescriptionInput = document.getElementById("edit_g_description");
 
-         // Lấy tất cả các link "Sửa" trong các thẻ game
-        var editLinks = document.querySelectorAll(".game-card .card-actions a.edit-link"); // Chọn dựa vào class .edit-link
+         // Lấy tất cả các link "Sửa" và icon "Xóa" trong các thẻ game
+        var editLinks = document.querySelectorAll(".game-card .card-actions a.edit-link");
+        var deleteIcons = document.querySelectorAll(".game-card .card-actions .delete-icon");
 
 
         // --- Hàm để Hiện/Ẩn Modal có hiệu ứng ---
         function showModal(modalElement) {
-            modalElement.style.display = "block"; // Bước 1: Hiển thị container
-            // Bước 2: Thêm class 'show' sau một khoảng chờ nhỏ để kích hoạt transition
+            modalElement.style.display = "block";
             setTimeout(function() {
                 modalElement.classList.add('show');
-            }, 10); // 10ms là đủ để trình duyệt xử lý display: block
+            }, 10); // Delay nhỏ cho hiệu ứng
         }
 
         function hideModal(modalElement) {
-            modalElement.classList.remove('show'); // Bước 1: Xóa class 'show' để bắt đầu transition ngược
-            // Bước 2: Ẩn container hoàn toàn sau khi transition kết thúc
-            // Thời gian chờ phải khớp với thời gian transition trong CSS (0.3s = 300ms)
+            modalElement.classList.remove('show');
             setTimeout(function() {
                 modalElement.style.display = "none";
-                // Tùy chọn: Reset form tương ứng khi đóng modal
+                // Reset form tương ứng khi đóng modal
                 if(modalElement.id === 'addGameModal') {
-                     modalElement.querySelector('form').reset(); // Reset form thêm
+                     modalElement.querySelector('form').reset();
                 } else if (modalElement.id === 'editGameModal') {
-                     modalElement.querySelector('form').reset(); // Reset form sửa
+                     modalElement.querySelector('form').reset();
                 }
-
             }, 300); // Thời gian chờ khớp với CSS transition
         }
 
 
         // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Mới ---
-
-        // Khi nhấp nút "Thêm Game Mới"
-        if(addBtn) { // Kiểm tra nút có tồn tại không
+        if(addBtn) {
              addBtn.onclick = function(event) {
-                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a> (chuyển hướng)
-                // form.reset(); // Reset form thêm trước khi mở (có thể làm trong hideModal hoặc ở đây)
+                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a>
                 showModal(addModal);
             }
         }
 
-
-        // Khi nhấp nút đóng (X) modal thêm
-        addCloseSpan.onclick = function() {
-            hideModal(addModal);
-        }
-
-        // Khi nhấp nút Hủy modal thêm
-        addCancelButton.onclick = function() {
-             hideModal(addModal);
-        }
+        addCloseSpan.onclick = function() { hideModal(addModal); }
+        addCancelButton.onclick = function() { hideModal(addModal); }
 
 
-        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa và Tải dữ liệu ---
-
-        // Gán sự kiện click cho mỗi link "Sửa"
+        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa và Đọc dữ liệu từ HTML ---
         editLinks.forEach(link => {
             link.onclick = function(event) {
-                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a> (chuyển hướng)
+                event.preventDefault(); // Ngăn chặn hành động mặc định của thẻ <a>
 
-                // Lấy Game ID từ thuộc tính href của link
-                // Ví dụ href="/edit/GA0001", chúng ta muốn lấy "GA0001"
-                var href = link.getAttribute('href');
-                var gameId = href.substring(href.lastIndexOf('/') + 1); // Lấy phần sau dấu '/' cuối cùng
+                // --- Đọc dữ liệu game từ các data attribute của thẻ cha .game-card ---
+                const gameCard = link.closest('.game-card'); // Tìm phần tử .game-card cha gần nhất
+                const gameId = gameCard ? gameCard.getAttribute('data-game-id') : null;
+                const gameName = gameCard ? gameCard.getAttribute('data-game-name') : null;
+                const gamePrice = gameCard ? gameCard.getAttribute('data-game-price') : null;
+                const gameDescription = gameCard ? gameCard.getAttribute('data-game-description') : null;
 
-                // Reset form sửa trước khi tải dữ liệu mới
+                if (!gameId) {
+                     alert("Lỗi: Không lấy được Game ID từ HTML.");
+                     return;
+                }
+
+                // Reset form sửa trước khi điền dữ liệu mới
                 editForm.reset();
 
-                // --- Gửi yêu cầu AJAX đến backend để lấy dữ liệu game ---
-                // Sử dụng {{ url_for('get_game_api', game_id='_GAME_ID_') }} để Flask tạo mẫu URL
-                // Sau đó dùng .replace() trong JS để thay placeholder bằng gameId thực tế
-                var fetchUrl = "{{ url_for('get_game_api', game_id='_GAME_ID_') }}".replace('_GAME_ID_', gameId);
+                // --- Điền dữ liệu vào form sửa modal ---
+                editGameIdInput.value = gameId;
+                // Sử dụng giá trị rỗng nếu data attribute là null
+                editGameNameInput.value = gameName !== null ? gameName : '';
+                editGamePriceInput.value = gamePrice !== null ? gamePrice : '';
+                editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
 
-                fetch(fetchUrl) // Gửi yêu cầu GET
-                .then(response => {
-                     if (!response.ok) {
-                         // Nếu có lỗi HTTP (ví dụ: 404 Not Found)
-                         // Cố gắng đọc JSON để lấy thông báo lỗi từ backend
-                         return response.json().then(data => {
-                            throw new Error(data.error || 'Could not fetch game data.');
-                        });
-                    }
-                    // Nếu thành công, đọc JSON
-                    return response.json();
-                })
-                .then(data => {
-                    // Xử lý dữ liệu phản hồi
-                    if (data.success && data.game) {
-                        // Đổ dữ liệu vào form sửa
-                        editGameIdInput.value = data.game.game_id;
-                        editGameNameInput.value = data.game.game_name !== null ? data.game.game_name : '';
-                        // Cần xử lý giá trị decimal/float từ JSON sang string cho input type="text"
-                        editGamePriceInput.value = data.game.game_price !== null ? parseFloat(data.game.game_price).toFixed(2) : ''; // Định dạng 2 chữ số thập phân
-                         // Xử lý giá trị null cho description
-                        editGameDescriptionInput.value = data.game.game_description !== null ? data.game.game_description : '';
+                // Hiện modal sửa
+                showModal(editModal);
 
-                        // Lưu ý: Engine, Publisher, Released Date không sửa qua SP UpdateGameInfo.
-                        // Nếu muốn hiển thị, cần thêm các phần tử HTML tĩnh và điền dữ liệu vào đó.
-
-                        // Hiện modal sửa
-                        showModal(editModal);
-                    } else {
-                        // Hiển thị thông báo lỗi nếu fetch thành công nhưng API báo lỗi logic
-                        alert("Error fetching game data: " + (data.error || "Unknown error."));
-                    }
-                })
-                .catch(error => {
-                    // Bắt các lỗi mạng hoặc lỗi từ khối .then()
-                    console.error('Error:', error);
-                    alert("An error occurred while fetching game data: " + error.message);
-                });
+                // --- Đã bỏ đoạn mã fetch(fetchUrl) đến get_game_api ---
             }
         });
 
-        // Khi nhấp nút đóng (X) modal sửa
-        editCloseSpan.onclick = function() {
-            hideModal(editModal);
-        }
-
-        // Khi nhấp nút Hủy modal sửa
-        editCancelButton.onclick = function() {
-             hideModal(editModal);
-        }
-
+        editCloseSpan.onclick = function() { hideModal(editModal); }
+        editCancelButton.onclick = function() { hideModal(editModal); }
 
         // --- Xử lý sự kiện Nhấp ra ngoài Modal ---
-         // Đặt ở cuối để bắt sự kiện cho cả hai modal
         window.onclick = function(event) {
-            if (event.target == addModal) {
-                hideModal(addModal);
-            }
-             if (event.target == editModal) {
-                hideModal(editModal);
-            }
+            if (event.target == addModal) { hideModal(addModal); }
+            if (event.target == editModal) { hideModal(editModal); }
         }
 
 
-        // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX (Giữ nguyên logic) ---
-         // Đảm bảo addForm tồn tại trước khi gán onsubmit
+        // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX ---
         if(addForm) {
             addForm.onsubmit = function(event) {
                 event.preventDefault();
@@ -659,22 +588,27 @@
                 })
                 .then(response => {
                     if (!response.ok) {
+                        // Nếu response status không phải 2xx, cố gắng đọc lỗi JSON
                         return response.json().then(data => {
-                            throw new Error(data.error || 'An unknown error occurred on the server.');
+                            throw new Error(data.error || `HTTP error! Status: ${response.status}`);
                         });
                     }
+                    // Nếu thành công, đọc JSON
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        alert("Game added successfully!");
+                        // Sử dụng thông báo từ backend
+                        alert(data.message || "Game added successfully!");
                         hideModal(addModal);
                         window.location.reload(); // Tải lại trang để cập nhật danh sách
                     } else {
+                         // Xử lý trường hợp success: false
                          alert("Error: " + (data.error || "Failed to add game."));
                     }
                 })
                 .catch(error => {
+                    // Bắt lỗi mạng hoặc lỗi từ khối .then()
                     console.error('Error:', error);
                     alert("An error occurred: " + error.message);
                 });
@@ -683,7 +617,6 @@
 
 
         // --- JavaScript để Xử lý Form Sửa bằng AJAX ---
-         // Đảm bảo editForm tồn tại trước khi gán onsubmit
         if(editForm) {
             editForm.onsubmit = function(event) {
                  event.preventDefault();
@@ -696,29 +629,89 @@
                 })
                 .then(response => {
                     if (!response.ok) {
+                         // Nếu response status không phải 2xx, cố gắng đọc lỗi JSON
                          return response.json().then(data => {
-                             throw new Error(data.error || 'An unknown error occurred on the server.');
+                             throw new Error(data.error || `HTTP error! Status: ${response.status}`);
                         });
                     }
+                    // Nếu thành công, đọc JSON
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        alert("Game updated successfully!");
+                        // Sử dụng thông báo từ backend
+                        alert(data.message || "Game updated successfully!");
                         hideModal(editModal);
                         window.location.reload(); // Tải lại trang để cập nhật danh sách
                     } else {
+                         // Xử lý trường hợp success: false
                         alert("Error: " + (data.error || "Failed to update game."));
                     }
                 })
                 .catch(error => {
+                    // Bắt lỗi mạng hoặc lỗi từ khối .then()
                     console.error('Error:', error);
-                    alert("An error occurred: " + error.message);
+                    alert("An error occurred while updating the game: " + error.message);
                 });
             };
         }
 
-        // --- Hàm cho hiệu ứng mờ dần thông báo flash (tùy chọn) ---
+        // --- JavaScript để Xử lý Xóa bằng AJAX ---
+        deleteIcons.forEach(icon => {
+            icon.onclick = function(event) {
+                event.preventDefault();
+
+                // Lấy Game ID từ data attribute của icon
+                const gameId = icon.getAttribute('data-game-id');
+
+                if (!gameId) {
+                     alert("Lỗi: Không lấy được Game ID để xóa.");
+                     return;
+                }
+
+                // Xác nhận trước khi xóa
+                if (confirm('Bạn có chắc chắn muốn xóa game này không?')) {
+                    // Gửi yêu cầu AJAX để xóa
+                    // Sử dụng POST với FormData chứa item_id
+                    const formData = new FormData();
+                    formData.append('item_id', gameId);
+
+                    fetch("{{ url_for('delete_game_api') }}", { // URL của route API xóa
+                        method: 'POST', // Sử dụng POST như định nghĩa route API xóa
+                        body: formData
+                    })
+                    .then(response => {
+                        // Kiểm tra response.ok trước khi đọc JSON
+                        if (!response.ok) {
+                            // Cố gắng đọc JSON để lấy thông báo lỗi từ backend
+                            return response.json().then(data => {
+                                throw new Error(data.error || `HTTP error! Status: ${response.status}`);
+                            });
+                        }
+                        // Nếu thành công (status 2xx), đọc JSON
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Sử dụng thông báo từ backend
+                            alert(data.message || "Game deleted successfully!");
+                            window.location.reload(); // Tải lại trang để cập nhật danh sách
+                        } else {
+                            // Xử lý trường hợp success: false
+                            alert("Error: " + (data.error || "Failed to delete game."));
+                        }
+                    })
+                    .catch(error => {
+                        // Bắt lỗi mạng hoặc lỗi từ khối .then()
+                        console.error('Error:', error);
+                        alert("An error occurred while deleting the game: " + error.message);
+                    });
+                }
+            }
+        });
+
+
+        // --- Hàm cho hiệu ứng mờ dần thông báo flash ---
         window.addEventListener('load', function() {
             const flashMessages = document.querySelectorAll('.flashes li');
             flashMessages.forEach(msg => {
@@ -733,7 +726,8 @@
             });
         });
 
-
     </script>
-    </body>
+
+
+</body>
 </html>

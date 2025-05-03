@@ -91,7 +91,7 @@ def add_game_api():
     conn = get_db_connection()
     if not conn:
         return jsonify({'success': False, 'error': 'Could not connect to the database.'}), 500
-
+    
     cursor = conn.cursor()
     try:
         # --- Gọi thủ tục lưu trữ InsertGame ---
@@ -155,7 +155,6 @@ def update_game_api():
     g_description = request.form.get('g_description', '').strip()
 
     # --- Validate dữ liệu cơ bản ở backend ---
-    # Game ID là bắt buộc
     if not game_id:
          return jsonify({'success': False, 'error': 'Game ID is missing for update.'}), 400
 
@@ -169,24 +168,8 @@ def update_game_api():
         except ValueError:
              return jsonify({'success': False, 'error': 'Invalid price format.'}), 400
 
-    # Các trường GName, GDescription có thể rỗng hoặc NULL.
-    # Thủ tục UpdateGameInfo sử dụng ISNULL(@Param, old_value).
-    # Để ISNULL hoạt động, chúng ta cần truyền NULL từ Python.
-    # Tuy nhiên, nếu người dùng muốn cập nhật thành chuỗi rỗng '', chúng ta cần truyền ''.
-    # Dựa trên SP, nếu truyền NULL, nó giữ giá trị cũ. Nếu truyền '', nó cập nhật thành ''.
-    # Let's transmit '' if the user entered '', and None if the user cleared the field entirely?
-    # Or, pass the value as is, and let the SP handle ISNULL? Yes, pass the stripped string.
-    # If the user sends an empty string '', the SP will get ''. If they clear the field and it's not sent,
-    # or sent as None by FormData (unlikely for text input), SP might see NULL.
-    # Let's send the stripped string. The SP uses ISNULL(@GName, game_name) - this means
-    # if @GName is NULL, keep old name. If @GName is '', update to ''.
-    # To allow clearing a field (setting to NULL) via form, it's complex.
-    # For simplicity, let's send the stripped string. If it's '', SP updates to ''.
-    # If you want to allow setting to NULL, you'd need checkboxes or specific indicators in the form.
-    # Let's stick to the SP's ISNULL behavior with stripped strings.
-    # A blank input sends ''.
-    g_name_for_sp = g_name # Send stripped string
-    g_description_for_sp = g_description # Send stripped string
+    g_name_for_sp = g_name if g_name else None
+    g_description_for_sp = g_description if g_description else None
 
 
     conn = get_db_connection()
@@ -196,21 +179,17 @@ def update_game_api():
     cursor = conn.cursor()
     try:
         # --- Gọi thủ tục lưu trữ UpdateGameInfo ---
-        # Đảm bảo tên thủ tục và số lượng/thứ tự/kiểu tham số khớp chính xác
         sql_call = "{CALL UpdateGameInfo(?, ?, ?, ?)}"
         params = (
              game_id,
-             g_name_for_sp, # Truyền chuỗi (có thể rỗng) hoặc None
-             g_price,       # Truyền float hoặc None
-             g_description_for_sp # Truyền chuỗi (có thể rỗng) hoặc None
+             g_name_for_sp, 
+             g_price,      
+             g_description_for_sp 
         )
 
         cursor.execute(sql_call, params)
-        conn.commit() # Xác nhận thay đổi
+        conn.commit() 
 
-        # Thủ tục có thể in thông báo. Dựa vào việc không có lỗi THROW để xác định thành công.
-
-        # Trả về JSON báo thành công
         return jsonify({'success': True, 'message': f'Game {game_id} updated successfully!'})
 
 
@@ -250,66 +229,60 @@ def update_game_api():
         if conn: conn.close()
 
 
-# --- Route xóa dữ liệu (Giữ nguyên) ---
-# Xử lý xóa game bằng cách gọi DELETE
-@app.route('/delete/<string:item_id>') # Game ID là varchar(6), nên nhận là string
-def delete_data(item_id):
-     """Xử lý xóa game theo ID."""
-     conn = get_db_connection()
-     # Sử dụng flash và redirect cho route xóa đơn giản này
-     if not conn:
-         flash('Could not connect to the database.', 'error')
-         return redirect(url_for('list_data'))
+# --- Route xóa dữ liệu ---
+@app.route('/api/delete_game', methods=['POST']) # Sử dụng POST cho request xóa từ form nhỏ
+def delete_game_api():
+    """Xử lý xóa game bằng cách gọi thủ tục DeleteGame và trả về JSON."""
+    conn = get_db_connection()
+    if not conn:
+         return jsonify({'success': False, 'error': 'Could not connect to the database.'}), 500
 
-     cursor = conn.cursor()
-     try:
-         # Câu lệnh DELETE trực tiếp (hoặc có thể gọi thủ tục xóa nếu có)
-         sql = "DELETE FROM GAMES WHERE game_id = ?"
-         cursor.execute(sql, (item_id,))
-         conn.commit()
+    cursor = conn.cursor()
+    try:
+        # Lấy Game ID từ dữ liệu gửi qua AJAX
+        item_id = request.form.get('item_id', '').strip() # @GID varchar(6)
 
-         # Kiểm tra số hàng bị ảnh hưởng để biết xóa thành công không
-         if cursor.rowcount == 0:
-              flash(f'Game with ID {item_id} not found.', 'warning')
-         else:
-             flash(f'Game {item_id} deleted successfully!', 'success')
+        if not item_id:
+             return jsonify({'success': False, 'error': 'Thiếu Game ID để xóa.'}), 400
 
-     except pyodbc.IntegrityError as err:
-         print(f"Integrity error deleting data: {err}")
-         # Lỗi khi bản ghi bị khóa ngoại tham chiếu
-         flash('Cannot delete this game because it is referenced by other data.', 'danger')
+        # --- Gọi thủ tục lưu trữ DeleteGame ---
+        # Tham số: @GID
+        sql_call = "{CALL DeleteGame(?)}"
+        params = (item_id,)
+
+        cursor.execute(sql_call, params)
+        conn.commit() # Xác nhận thay đổi
+
+        return jsonify({'success': True, 'message': f'Game "{item_id}" đã được xóa thành công!'})
+
+
+    # --- Bắt các lỗi THROW từ thủ tục SQL Server ---
+    except pyodbc.ProgrammingError as err:
+        print(f"Database error calling DeleteGame (API): {err}")
+        error_message = str(err)
+        # Kiểm tra các thông báo lỗi cụ thể từ thủ tục DeleteGame
+        if 'Game not found.' in error_message:
+             return jsonify({'success': False, 'error': 'Lỗi: Không tìm thấy game để xóa.'}), 404 # 404 Not Found
+        elif 'Failed to delete game.' in error_message: # Lỗi từ CATCH cuối cùng
+             return jsonify({'success': False, 'error': 'Xóa game thất bại do lỗi nội bộ.'}), 500
+        else:
+             return jsonify({'success': False, 'error': f'Lỗi CSDL: {error_message}'}), 500
+
+    # --- Bắt lỗi ràng buộc khóa ngoại (nếu SP không xử lý) ---
+    # SP DeleteGame của bạn không có TRY...CATCH cho IntegrityError, nên lỗi này sẽ bị bắt ở đây nếu xảy ra
+    except pyodbc.IntegrityError as err:
+         print(f"Integrity error deleting data (API): {err}")
          conn.rollback()
+         return jsonify({'success': False, 'error': 'Không thể xóa game này vì nó đang được tham chiếu bởi dữ liệu khác.'}), 400 # 400 Bad Request
 
-     except pyodbc.Error as err:
-         print(f"Error deleting data: {err}")
-         flash('An error occurred while deleting data.', 'danger')
-         conn.rollback()
-     finally:
-         if cursor: cursor.close()
-         if conn: conn.close()
+    except pyodbc.Error as err:
+        print(f"General database error during delete (API): {err}")
+        conn.rollback()
+        return jsonify({'success': False, 'error': 'Đã xảy ra lỗi cơ sở dữ liệu khi xóa game.'}), 500
 
-     # Redirect về trang danh sách sau khi xóa
-     return redirect(url_for('list_data'))
-
-# --- Route gốc cho form thêm/sửa riêng (Có thể bỏ qua nếu chỉ dùng modal) ---
-# Nếu bạn muốn giữ form.html làm trang riêng (fallback), bạn cần thêm logic xử lý
-# GET và POST cho route này. Hiện tại, các route API đã xử lý POST cho modal.
-# @app.route('/add', methods=['GET', 'POST'])
-# def add_data_page():
-#     """(Tùy chọn) Route cho trang thêm mới dữ liệu riêng."""
-#     # Logic để hiển thị form.html trên URL /add
-#     if request.method == 'GET':
-#          return render_template('form.html')
-#     # Logic xử lý POST nếu form này được submit trực tiếp (không qua AJAX modal)
-#     # else:
-#          # Có thể gọi lại logic từ add_game_api hoặc viết riêng
-#          # flash messages và redirect ở đây thay vì trả về JSON
-
-# @app.route('/edit/<string:item_id>', methods=['GET', 'POST'])
-# def edit_data_page(item_id):
-#     """(Tùy chọn) Route cho trang sửa dữ liệu riêng."""
-#     # Logic để hiển thị form.html với dữ liệu game trên URL /edit/ID
-#     # Logic xử lý POST nếu form này được submit trực tiếp
+    finally:
+        if cursor: cursor.close()
+        if conn: conn.close()
 
 # --- Phần chạy ứng dụng ---
 if __name__ == '__main__':
