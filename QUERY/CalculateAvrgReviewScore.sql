@@ -28,13 +28,13 @@ BEGIN
 
     IF @GameName IS NULL
     BEGIN
-        INSERT INTO @Result VALUES (0, 'Game does not exist', 0, 0, 0)
+        INSERT INTO @Result VALUES (0, 'Game does not exist', 0, 0, 'Unknown', 0)
         RETURN
     END
 
     IF NOT EXISTS (SELECT 1 FROM REVIEWS WHERE game_review = @InputGameID)
     BEGIN
-        INSERT INTO @Result VALUES (0, 'Game not rated yet', 0, 0, 0)
+        INSERT INTO @Result VALUES (0, 'Game not rated yet', 0, 0, 'Unknown', 0)
         RETURN
     END
 
@@ -84,7 +84,7 @@ BEGIN
         @GameName,
         @AverageRaiting,
         @ReviewCount,
-        @Category
+        @Category,
         @PositivePercent
     )
 
