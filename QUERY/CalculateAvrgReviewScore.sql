@@ -67,11 +67,11 @@ BEGIN
 
     DECLARE @Category VARCHAR(80)
     SET @Category = CASE 
-        WHEN @AverageRaiting >= 8.00 THEN '★★★★★'
-        WHEN @AverageRaiting >= 6.00 THEN '★★★★'
-        WHEN @AverageRaiting >= 4.00 THEN '★★★'
-        WHEN @AverageRaiting >= 2.00 THEN '★★'
-        ELSE '★'
+        WHEN @AverageRaiting >= 8.00 THEN 'Excellent'
+        WHEN @AverageRaiting >= 6.00 THEN 'Average'
+        WHEN @AverageRaiting >= 4.00 THEN 'Low'
+        WHEN @AverageRaiting >= 2.00 THEN 'Ultra Low'
+        ELSE 'Potato'
     END
 
     DECLARE @PositivePercent DECIMAL (18, 2) = 0.00

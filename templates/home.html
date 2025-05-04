@@ -6,50 +6,29 @@
     <title>Trang Chủ - Hệ Cơ Sở Dữ Liệu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Styles cụ thể cho home.html */
-        .button-container {
-            display: flex;
-            gap: 20px; /* Space between buttons */
-            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
-            justify-content: center; /* Center buttons within the container */
-        }
-
-        /* Media query for smaller screens */
-        @media (max-width: 600px) {
-            .button-container {
-                flex-direction: column; /* Stack buttons vertically */
-                align-items: stretch; /* Stretch buttons to fill container */
-            }
-
-            .button-container .button-link { /* Sử dụng class button-link */
-                 text-align: center; /* Center text inside stretched button */
-            }
-        }
-         /* Center align content on home page */
-         body {
+        /* Basic centering for home page */
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             flex-direction: column;
-            padding: 50px; /* Thêm padding */
-            text-align: center; /* Center align content */
+            text-align: center;
         }
-
-        h1 {
-             margin-bottom: 30px;
+        .home-links a {
+            margin: 10px; /* Space between links */
         }
     </style>
 </head>
 <body>
-    <h1>Chào mừng đến với Hệ Cơ Sở Dữ Liệu STEAM</h1>
-
-    <div class="button-container">
-        <a href="{{ url_for('list_data') }}" class="button-link">Xem Danh Sách Game</a>
-
-        <a href="{{ url_for('procedures_demo') }}" class="button-link">Demo Gọi Thủ Tục</a> {# Sử dụng class button-link #}
-
-        <a href="{{ url_for('functions_demo') }}" class="button-link">Demo Gọi Hàm SQL</a>
+    <div class="container">
+        <h1>Chào mừng đến với Ứng dụng hệ cơ sở dữ liệu</h1>
+        <div class="home-links">
+            <a href="{{ url_for('list_data') }}" class="button-link">Xem Danh Sách Game</a>
+            <a href="{{ url_for('functions_demo') }}" class="button-link">Demo Gọi Thủ Tục</a>
+        </div>
     </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

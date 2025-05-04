@@ -32,7 +32,7 @@ BEGIN
     -- CURSOR
     DECLARE TransactionCursor CURSOR FOR
     SELECT
-        pr.final_price,
+        pr.product_price,
         p.purchased_quantity
     FROM 
         [TRANSACTION] AS t

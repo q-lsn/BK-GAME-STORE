@@ -1,371 +1,390 @@
-/* --- Các style chung cho toàn bộ ứng dụng --- */
+/* static/style.css */
+
+/* --- Basic and Common Styles --- */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1a202a; /* Nền màu tối */
-    color: #e0e0e0; /* Màu chữ sáng */
+    font-family: sans-serif;
+    line-height: 1.6;
     margin: 0;
-    padding: 20px; /* Thêm padding cho body */
-    line-height: 1.6; /* Tăng khoảng cách dòng */
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    max-width: 960px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2, h3 {
-    color: #1a9fd9; /* Màu xanh Steam cho tiêu đề */
+    color: #333;
+    margin-top: 0; /* Remove default top margin for headings */
 }
 
-a {
-    color: #1a9fd9; /* Màu xanh Steam cho link */
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
-/* Style cho flash messages */
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
 .flashes {
     list-style: none;
     padding: 0;
-    margin: 10px auto; /* Căn giữa */
-    max-width: 1000px; /* Giới hạn chiều rộng */
-    text-align: center;
+    margin-bottom: 20px;
 }
 
 .flashes li {
     padding: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     border-radius: 4px;
-    /* Loại bỏ hiệu ứng mờ dần */
-    /* opacity: 1; */
-    /* transition: none; */
 }
 
-.success {
-    background-color: #28a745; /* Xanh lá */
-    color: white;
+.flashes li.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
 }
 
-.warning {
-    background-color: #ffc107; /* Vàng */
-    color: #333;
+.flashes li.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
 }
 
-.danger {
-    background-color: #dc3545; /* Đỏ */
-    color: white;
+.flashes li.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeeba;
 }
 
-/* --- Style cho nút chung (dùng cho home, add button) --- */
-.button-link {
-    display: inline-block;
-    padding: 8px 15px;
-    background: linear-gradient(to bottom, #1a9fd9, #1a80b9); /* Steam blue gradient */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease; /* Giữ hiệu ứng hover đơn giản */
-    font-size: 1em;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-.button-link:hover {
-    background: linear-gradient(to bottom, #1a80b9, #1a9fd9);
-}
-
-/* --- Container chung cho nội dung trang --- */
-.container {
-    max-width: 1000px; /* Giới hạn chiều rộng nội dung */
-    margin: 0 auto; /* Căn giữa */
-}
-
-/* --- Style cho các phần nội dung (ví dụ: procedure-section) --- */
-.content-section { /* Tên chung hơn procedure-section */
-    background-color: #2d3b45; /* Nền tối hơn */
-    padding: 20px;
-    margin-bottom: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.content-section h2 {
-    margin-top: 0;
-    border-bottom: 1px solid #3a4752;
-    padding-bottom: 10px;
+form {
     margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
 }
 
-.content-section form label {
+form div {
+    margin-bottom: 10px;
+}
+
+label {
     display: block;
     margin-bottom: 5px;
-    color: #b0b0b0;
-}
-
-.content-section form input[type="text"],
-.content-section form input[type="date"],
-.content-section form input[type="number"],
-.content-section form select,
-.content-section form textarea { /* Thêm textarea */
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background-color: #3a4752;
-    color: #e0e0e0;
-    font-size: 1em;
-}
-
-.content-section form button[type="submit"] {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #28a745;
-    color: white;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-.content-section form button[type="submit"]:hover {
-    background-color: #218838;
-}
-
-
-/* --- Style cho khu vực hiển thị kết quả (bảng) --- */
-.results-area {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px dashed #3a4752;
-}
-
-.results-area h3 {
-    margin-top: 0;
-    color: #ffc107; /* Màu vàng */
-    font-size: 1.1em;
-}
-
-.results-area table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 0.9em;
-    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng rộng */
-    display: block; /* Quan trọng để overflow-x hoạt động */
-    white-space: nowrap; /* Ngăn chữ bị ngắt dòng trong ô */
-}
-
-.results-area table th,
-.results-area table td {
-    border: 1px solid #555;
-    padding: 8px;
-    text-align: left;
-    vertical-align: top;
-     white-space: normal; /* Cho phép ngắt dòng bình thường bên trong td/th */
-}
-
-.results-area table th {
-    background-color: #3a4752;
-    color: #e0e0e0;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.results-area table tr:nth-child(even) {
-    background-color: #34404a;
-}
-
-.results-area table tr:hover {
-    background-color: #4a5662;
-}
-
-/* Style cho cột Actions trong bảng (Sửa/Xóa) */
-.results-area table td.actions {
-    white-space: nowrap;
-    width: 80px; /* Giữ chiều rộng cố định */
-}
-
-.results-area table td.actions a,
-.results-area table td.actions .delete-icon {
-    font-size: 0.9em;
-    margin-right: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.2s ease; /* Giữ hiệu ứng hover đơn giản */
-}
-.results-area table td.actions a:hover { text-decoration: underline; color: #41a7e8; }
-
-.results-area table td.actions .delete-icon {
-    color: #dc3545;
-}
-.results-area table td.actions .delete-icon:hover {
-    color: #ff7675;
-}
-
-/* Style cho các nút/icon bị disable */
-.actions .disabled {
-    color: #6c757d; /* Màu xám */
-    cursor: not-allowed !important; /* Con trỏ không cho phép */
-    text-decoration: none !important;
-    pointer-events: none; /* Ngăn chặn sự kiện click */
-}
- .actions .disabled:hover {
-     color: #6c757d !important; /* Giữ màu xám khi hover */
- }
-
-
-.results-area p {
-    color: #b0b0b0;
-    font-size: 1em;
-}
-
-.results-area .error-message {
-    color: #dc3545;
     font-weight: bold;
 }
 
-/* Ghi chú về hạn chế */
-.limitation-note {
-    margin-top: 15px;
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+    width: calc(100% - 22px); /* Adjust for padding and border */
     padding: 10px;
-    background-color: #4a5662;
-    border-left: 4px solid #ffc107;
-    font-size: 0.9em;
-    color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
-/* --- Style cho Modal (chung cho tất cả modal) --- */
+button {
+    padding: 10px 15px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+.cancel-button {
+    background-color: #f0ad4e;
+}
+.cancel-button:hover {
+    background-color: #ec971f;
+}
+
+.button-link {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #0275d8;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.button-link:hover {
+    background-color: #025aa5;
+}
+
+.actions a, .actions span {
+    margin-right: 8px; /* Increase spacing */
+    text-decoration: none;
+    cursor: pointer;
+    color: #0275d8;
+}
+.actions span.delete-item-icon {
+    color: #d9534f;
+}
+
+.actions a:hover, .actions span:hover {
+    text-decoration: underline;
+}
+
+
+/* Modal styles (essential for functionality) */
 .modal {
-   display: none; /* Mặc định ẩn modal */
-   position: fixed; /* Giữ cố định trên toàn màn hình */
-   z-index: 1000; /* Đảm bảo modal hiển thị trên các nội dung khác */
-   left: 0;
-   top: 0;
-   width: 100%; /* Chiều rộng toàn màn hình */
-   height: 100%; /* Chiều cao toàn màn hình */
-   overflow: auto; /* Cho phép cuộn nếu nội dung quá dài */
-   background-color: rgba(0, 0, 0, 0.6); /* Lớp nền mờ màu đen */
-   /* Loại bỏ hiệu ứng mờ dần */
-   /* opacity: 0; */
-   /* transition: none; */
-   /* pointer-events: none; */
-}
-
-/* Định nghĩa trạng thái khi modal hiển thị */
-.modal.show { /* Class 'show' có thể không cần nếu bỏ transition */
-   display: block; /* Chỉ cần hiển thị block */
-   /* opacity: 1; */
-   /* pointer-events: auto; */
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding-top: 60px; /* Space from top */
 }
 
 .modal-content {
-   background-color: #2d3b45; /* Nền của nội dung modal (tông màu Steam) */
-   margin: 5% auto; /* Căn giữa theo chiều dọc và thêm margin trên dưới */
-   padding: 20px;
-   border: 1px solid #555;
-   border-radius: 8px;
-   width: 80%; /* Chiều rộng của nội dung modal */
-   max-width: 500px; /* Chiều rộng tối đa */
-   position: relative; /* Quan trọng cho nút đóng */
-   color: #e0e0e0; /* Màu chữ sáng */
+    background-color: #fefefe;
+    margin: 5% auto; /* Reduced margin from top */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more responsive */
+    max-width: 500px;
+    border-radius: 8px;
+    position: relative;
 }
 
-
 .modal-content h2 {
-   margin-top: 0;
-   color: #1a9fd9;
-   margin-bottom: 20px;
+    margin-top: 0;
+    margin-bottom: 15px; /* Add space below title */
 }
 
 .close-button {
-   color: #aaa;
-   float: right;
-   font-size: 28px;
-   font-weight: bold;
-   position: absolute;
-   top: 10px;
-   right: 15px;
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
 }
 
 .close-button:hover,
 .close-button:focus {
-   color: #e0e0e0;
-   text-decoration: none;
-   cursor: pointer;
+    color: #333;
+    text-decoration: none;
 }
 
-.modal-content form input[type="text"],
-.modal-content form input[type="number"],
-.modal-content form input[type="date"],
-.modal-content form textarea {
-   width: calc(100% - 22px);
-   padding: 10px;
-   margin-bottom: 10px;
-   border: 1px solid #555;
-   border-radius: 4px;
-   background-color: #3a4752;
-   color: #e0e0e0;
-   font-size: 1em;
+/* --- Home Page Specific Styles --- */
+/* Styles already embedded in home.html can be moved here */
+body.home { /* Add a class="home" to your body tag in home.html */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px; /* Ensure padding is applied */
 }
 
-.modal-content form button[type="submit"],
-.modal-content form .cancel-button {
-   padding: 10px 20px;
-   margin-right: 10px;
-   border: none;
-   border-radius: 4px;
-   cursor: pointer;
-   transition: background-color 0.3s ease;
-   font-size: 1em;
+.home .container { /* Apply container styles within home context */
+     margin: 0; /* Remove auto margin if body is flex centered */
+     padding: 30px; /* Add more padding for home container */
+     text-align: center;
 }
 
-.modal-content form button[type="submit"] {
-   background-color: #28a745;
-   color: white;
+.home-links {
+    margin-top: 20px; /* Add space above links */
 }
 
-.modal-content form button[type="submit"]:hover {
-   background-color: #218838;
+.home-links .button-link {
+    margin: 10px; /* Space between links */
 }
 
-.modal-content form .cancel-button {
-   background-color: #6c757d;
-   color: white;
+
+/* --- Index Page Specific Styles --- */
+/* Styles for the simple game list */
+.game-list-simple {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Remove default margin */
 }
 
-.modal-content form .cancel-button:hover {
-   background-color: #5a6268;
+.game-list-simple li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 15px; /* Increase space between items */
+    padding: 15px;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
-/* Media query cho màn hình nhỏ */
+.game-list-simple li h3 {
+    margin-bottom: 5px; /* Reduce space below title */
+    color: #0275d8; /* Highlight game name */
+}
+
+.game-list-simple li p {
+    margin: 5px 0; /* Space between paragraphs */
+    color: #555; /* Darker text for info */
+}
+
+.game-list-simple li strong {
+    margin-right: 10px;
+    color: #333;
+    font-weight: bold; /* Ensure boldness */
+}
+
+.game-list-simple .item-actions {
+    margin-top: 15px; /* Add space above actions */
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+/* Style for the controls container on index page */
+.controls-container {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee; /* Optional separator */
+}
+.controls-container .button-link {
+    margin-bottom: 0; /* Remove bottom margin if used within controls */
+}
+
+
+/* --- Procedures Demo Page Specific Styles --- */
+/* Style for sections containing forms and results */
+.content-section {
+    margin-bottom: 30px; /* Space between sections */
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.content-section h2 {
+    margin-bottom: 15px;
+    color: #0275d8; /* Highlight section title */
+    border-bottom: 2px solid #0275d8; /* Add a line below title */
+    padding-bottom: 5px;
+}
+
+.content-section form {
+    margin-bottom: 15px; /* Space between form and results area */
+    border: none; /* Remove border if .content-section has one */
+    padding: 0; /* Remove padding if .content-section has one */
+    background: none; /* Remove background if .content-section has one */
+}
+
+.results-area {
+    margin-top: 15px; /* Space above results */
+    padding: 15px;
+    border: 1px dashed #ccc; /* Dotted border for results */
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.results-area h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+/* Style for single result paragraphs */
+.results-area p {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333; /* Default color for results */
+}
+
+/* Optional: Add color indicators for specific results */
+.results-area p#avgReviewResult {
+     /* Maybe a neutral or informative color */
+     color: #007bff;
+}
+.results-area p#userSpendingResult {
+    /* Maybe a success color for spending */
+    color: #28a745;
+}
+
+
+/* Style for the limitation note */
+.limitation-note {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+/* Style for the back link container */
+.back-link-container {
+    margin-top: 30px;
+    text-align: center;
+}
+.back-link-container .button-link {
+    margin-bottom: 0;
+}
+
+/* Media Query for smaller screens (optional, but good practice) */
 @media (max-width: 768px) {
-   body {
-       padding: 10px;
-   }
-   .container {
-       max-width: 100%;
-   }
-    .content-section { /* Tên chung */
+    body {
+        padding: 10px;
+    }
+    .container {
         padding: 15px;
     }
-    .content-section form input[type="text"],
-    .content-section form input[type="date"],
-    .content-section form input[type="number"],
-    .content-section form select,
-    .content-section form textarea {
-        width: calc(100% - 20px);
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
     }
-     .results-area table th,
-      .results-area table td {
-          padding: 6px;
-      }
-      .results-area table { /* Cho phép bảng cuộn ngang trên màn hình nhỏ */
-          overflow-x: auto;
-          display: block;
-      }
-      .results-area table th, .results-area table td {
-           white-space: nowrap; /* Giữ nowrap trong ô khi cuộn */
-      }
-      .results-area table td.actions {
-           min-width: 80px; /* Đảm bảo đủ rộng */
-      }
+     input[type="text"],
+     input[type="date"],
+     input[type="number"],
+     select,
+     textarea {
+         width: calc(100% - 20px); /* Adjust padding */
+     }
+     .game-list-simple li strong {
+          width: 100px; /* Adjust label width */
+     }
+     .actions a, .actions span {
+         margin-right: 5px; /* Adjust spacing */
+         font-size: 0.9em;
+     }
+     table th, table td {
+         padding: 8px;
+         font-size: 0.9em;
+     }
+    /* Allow horizontal scrolling for tables on small screens if needed */
+    .results-area table {
+        overflow-x: auto;
+        display: block;
+    }
+    .results-area table th, .results-area table td {
+        white-space: nowrap; /* Prevent text wrapping in table cells */
+    }
 
 }

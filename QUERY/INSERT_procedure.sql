@@ -9,8 +9,7 @@ GO
 --GO
 
 CREATE OR ALTER PROCEDURE InsertGame
-    @GName          varchar(80),
-    @GPrice         decimal(10,2) = 0.00,    
+    @GName          varchar(80),  
     @GEngine        varchar(20) = 'Source',        
     @GDescription   varchar(2000) = 'No description.',    
     @GPublisher     varchar(80),
@@ -33,10 +32,6 @@ BEGIN
     IF EXISTS (SELECT 1 FROM GAMES WHERE game_name = @GName)
         THROW 50000, 'Game already exists.', 1;
 
-    -- Validate price is not negative
-    IF @GPrice < 0
-        THROW 50000, 'Price cannot be negative.', 1;
-
 	BEGIN TRY
 		-- Generate the new game ID
 		DECLARE @GID char(6);
@@ -48,10 +43,9 @@ BEGIN
         SELECT @PID = publisher_id FROM PUBLISHER WHERE name = @GPublisher;
 
 		-- Insert the new game
-		INSERT INTO GAMES(game_id, game_name, game_price, engine, game_description, game_publisher, date_released) VALUES
+		INSERT INTO GAMES(game_id, game_name, engine, game_description, game_publisher, date_released) VALUES
 		(	@GID,
 			@GName,
-			@GPrice,
 			@GEngine,
 			@GDescription,
 			@PID, 
