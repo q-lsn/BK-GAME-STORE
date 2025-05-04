@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, flash, jsonify
 import pyodbc
+from decimal import Decimal
 from datetime import datetime, date
 
 # --- Cấu hình ứng dụng Flask ---
@@ -238,11 +239,11 @@ def functions_demo():
 
                          total_spending = cursor.fetchone()[0]
 
-                         if total_spending == -1.01:
+                         if total_spending == Decimal('-1.01'):
                               func1_result = {'success': False, 'error': f'User ID "{user_id}" không tồn tại.'}
-                         elif total_spending == -1.02:
+                         elif total_spending == Decimal('-1.02'):
                               func1_result = {'success': False, 'error': f'User ID "{user_id}" chưa kích hoạt WALLET.'}
-                         elif total_spending == -1.03:
+                         elif total_spending == Decimal('-1.03'):
                               func1_result = {'success': False, 'error': 'Ngày bắt đầu không thể sau ngày kết thúc.'}
                          else:
                               func1_result = {'success': True, 'total_spending': total_spending}

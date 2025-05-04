@@ -49,14 +49,6 @@
              color: #333;
         }
 
-        .game-list-table tbody tr:nth-child(even) {
-             background-color: #f9f9f9; /* Màu nền xen kẽ cho dòng */
-        }
-
-         .game-list-table tbody tr:hover {
-             background-color: #e9e9e9; /* Hiệu ứng hover cho dòng */
-         }
-
 
         /* Style cho cột Actions trong bảng */
         .game-list-table .actions {
@@ -66,71 +58,6 @@
          .game-list-table .actions a,
          .game-list-table .actions span {
               margin: 0 5px; /* Khoảng cách giữa các action */
-         }
-
-
-        /* Style cho Modal (đã có style chung trong style.css) */
-        /* #addGameModal, #editGameModal */
-
-
-        /* Media query cho màn hình nhỏ */
-        @media (max-width: 768px) {
-             body {
-                 padding: 10px;
-             }
-             .header-container,
-             .controls-container,
-             .game-list-table {
-                 max-width: 100%; /* Cho phép sử dụng toàn bộ chiều rộng trên màn hình nhỏ */
-                 margin: 0 auto 15px auto; /* Điều chỉnh margin */
-             }
-
-             .controls-container {
-                 flex-direction: column;
-                 align-items: stretch;
-                 gap: 10px; /* Giảm khoảng cách */
-             }
-
-             .controls-container .button-link {
-                 width: 100%;
-                 box-sizing: border-box;
-                 text-align: center;
-             }
-
-             /* Cho phép bảng cuộn ngang nếu nội dung quá rộng */
-             .game-list-table {
-                  overflow-x: auto;
-                  display: block;
-             }
-             .game-list-table th,
-             .game-list-table td {
-                  white-space: nowrap; /* Ngăn wrap text trong ô */
-                  padding: 8px; /* Giảm padding */
-                  font-size: 0.9em; /* Giảm cỡ chữ */
-             }
-             .game-list-table .actions {
-                  white-space: nowrap;
-                  text-align: center;
-             }
-             .game-list-table .actions a,
-             .game-list-table .actions span {
-                 margin: 0 3px; /* Giảm khoảng cách */
-             }
-
-             /* Điều chỉnh modal trên màn hình nhỏ */
-             .modal-content {
-                 width: 95%;
-                 margin: 5% auto;
-                 padding: 15px;
-             }
-              input[type="text"],
-              input[type="date"],
-              input[type="number"],
-              select,
-              textarea {
-                  width: calc(100% - 20px); /* Adjust padding */
-              }
-
          }
 
     </style>
@@ -230,8 +157,8 @@
                 </div>
                 <br>
                  <div>
-                    <label for="p_id">Publisher Name:</label><br> {# SP InsertGame nhận Publisher Name #}
-                    <input type="text" id="publisher_name" name="p_id" required> {# Sử dụng name="p_id" khớp với API #}
+                    <label for="publisher_name">Publisher Name:</label><br> {# SP InsertGame nhận Publisher Name #}
+                    <input type="text" id="publisher_name" name="publisher_name" required> {# Sử dụng name="p_id" khớp với API #}
                 </div>
                 <br>
                  <div>
@@ -323,13 +250,7 @@
         var editGameIdInput = document.getElementById("edit_game_id");
         var editGameNameInput = document.getElementById("edit_g_name");
         var editGameDescriptionInput = document.getElementById("edit_g_description");
-        // Thêm lấy input price/tradeable nếu có trong form sửa
-        // var editProductPriceInput = document.getElementById("edit_product_price");
-        // var editTradeableInput = document.getElementById("edit_tradeable");
 
-
-        // Lấy tất cả các link "Sửa" và icon "Xóa" trong bảng game
-        // Cập nhật selector để tìm trong bảng
         var editLinks = document.querySelectorAll(".game-list-table .actions .edit-item-link"); // Sử dụng class mới edit-item-link
         var deleteIcons = document.querySelectorAll(".game-list-table .actions .delete-item-icon"); // Sử dụng class mới delete-item-icon
 
@@ -338,15 +259,12 @@
         function showModal(modalElement) {
              if (modalElement) {
                   modalElement.style.display = "block";
-                  // modalElement.classList.add('show'); // Giữ lại class 'show' nếu cần animation CSS
               }
         }
 
         function hideModal(modalElement) {
              if (modalElement) {
-                 // modalElement.classList.remove('show'); // Giữ lại class 'show' nếu cần animation CSS
                  modalElement.style.display = "none";
-                 // Reset form tương ứng khi đóng modal
                  const form = modalElement.querySelector('form');
                  if (form) {
                       form.reset();
@@ -356,7 +274,7 @@
 
 
         // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Game ---
-        if(addBtn && addModal) { // Chỉ gán nếu các phần tử tồn tại
+        if(addBtn && addModal) { 
              addBtn.onclick = function(event) {
                  event.preventDefault();
                  showModal(addModal);
@@ -367,13 +285,11 @@
 
 
         // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa Game và Đọc dữ liệu từ HTML ---
-        if(editLinks && editModal) { // Chỉ gán nếu các phần tử tồn tại
+        if(editLinks && editModal) { 
             editLinks.forEach(link => {
                 link.onclick = function(event) {
                     event.preventDefault();
 
-                    // --- Đọc dữ liệu game từ data attribute của link ---
-                    // Lấy data attributes trực tiếp từ link Sửa
                     const gameId = link.getAttribute('data-id');
                     const gameName = link.getAttribute('data-game-name');
                     const gameDescription = link.getAttribute('data-game-description');
@@ -384,15 +300,12 @@
                          return;
                     }
 
-                    // Reset form sửa game trước khi điền dữ liệu mới
                     if(editForm) editForm.reset();
 
-                    // --- Điền dữ liệu vào form sửa modal Game ---
                     if(editGameIdInput) editGameIdInput.value = gameId;
                     if(editGameNameInput) editGameNameInput.value = gameName !== null ? gameName : '';
                     if(editGameDescriptionInput) editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
 
-                    // Hiện modal sửa game
                     showModal(editModal);
                 }
             });
@@ -400,20 +313,6 @@
             if(editCloseSpan) editCloseSpan.onclick = function() { hideModal(editModal); }
             if(editCancelButton) editCancelButton.onclick = function() { hideModal(editModal); }
         }
-
-
-        // --- Xử lý sự kiện Nhấp ra ngoài Modal ---
-         // Phải kiểm tra các modal có tồn tại trên trang không
-        window.onclick = function(event) {
-             const addModal = document.getElementById("addGameModal");
-             const editModal = document.getElementById("editGameModal");
-             // TODO: Thêm xử lý cho modal sửa chung (genericEditModal) nếu dùng
-
-             if (addModal && event.target == addModal) { hideModal(addModal); }
-             if (editModal && event.target == editModal) { hideModal(editModal); }
-             // if (genericEditModal && event.target == genericEditModal) { hideModal(genericEditModal); }
-        }
-
 
         // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX ---
         if(addForm) {
@@ -427,27 +326,19 @@
                      body: formData
                  })
                  .then(response => {
-                     // Luôn thử đọc response như JSON ĐÚNG MỘT LẦN
-                     // Sau đó kiểm tra response.ok để xử lý thành công/lỗi API
                      return response.json().then(data => ({ data, status: response.status, ok: response.ok }));
                  })
                  .then(({ data, status, ok }) => {
-                     // Xử lý dữ liệu đã đọc được và trạng thái response
                      if (ok) {
-                         // Case API thành công (HTTP status 2xx)
                          alert(data.message || "Thêm game thành công!");
                          hideModal(addModal);
-                         window.location.reload(); // Tải lại trang để cập nhật danh sách
+                         window.location.reload(); 
                      } else {
-                         // Case API báo lỗi (HTTP status không phải 2xx, nhưng response body vẫn là JSON)
-                         // data.error là thông báo lỗi từ backend API
                          alert("Lỗi: " + (data.error || `Yêu cầu thất bại với trạng thái ${status}`));
                      }
                  })
                  .catch(error => {
-                     // Case lỗi network hoặc lỗi khi parsing JSON response
                      console.error('Lỗi Fetch hoặc xử lý Response:', error);
-                      // Kiểm tra xem lỗi có phải do JSON parsing không thành công không
                      if (error.message.includes('JSON parse error') || error.message.includes('Unexpected token') || error.message.includes('Unexpected non-JSON')) {
                           alert("Đã xảy ra lỗi bất ngờ. Phản hồi từ máy chủ không phải là định dạng JSON hợp lệ.");
                      } else {
@@ -459,7 +350,7 @@
 
 
         // --- JavaScript để Xử lý Form Sửa Game bằng AJAX ---
-         if(editForm) { // Chỉ gán nếu form tồn tại
+         if(editForm) { 
              editForm.onsubmit = function(event) {
                  event.preventDefault();
 
@@ -511,8 +402,6 @@
                  icon.onclick = function(event) {
                      event.preventDefault();
 
-                     // Lấy Game ID từ data attribute của icon
-                     // **LƯU Ý:** API delete_game_api nhận 'item_id'
                      const itemId = icon.getAttribute('data-item-id');
 
                      if (!itemId) {
@@ -520,29 +409,25 @@
                           return;
                      }
 
-                     // Xác nhận trước khi xóa
                      if (confirm('Bạn có chắc chắn muốn xóa game này không?')) {
-                         // Gửi yêu cầu AJAX để xóa
                          const formData = new FormData();
-                         formData.append('item_id', itemId); // Gửi dưới tên 'item_id' theo API
+                         formData.append('item_id', itemId);
 
-                         fetch("{{ url_for('delete_game_api') }}", { // URL của route API xóa game
+                         fetch("{{ url_for('delete_game_api') }}", { 
                              method: 'POST',
                              body: formData
                          })
                          .then(response => {
                              if (!response.ok) {
-                                  // Handle non-JSON errors if necessary
                                  return response.json().then(data => {
                                      throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                                 }).catch(() => { // Catch JSON parse error on non-ok response
+                                 }).catch(() => { 
                                      return response.text().then(text => {
                                          throw new Error(`Non-JSON error response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
                                      });
                                  });
                              }
-                             // Handle potential non-JSON success responses
-                             return response.json().catch(() => { // Catch JSON parse error on ok response
+                             return response.json().catch(() => { 
                                   return response.text().then(text => {
                                       throw new Error(`Unexpected non-JSON success response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
                                   });
@@ -551,7 +436,7 @@
                          .then(data => {
                              if (data.success) {
                                  alert(data.message || "Game deleted successfully!");
-                                 window.location.reload(); // Tải lại trang để cập nhật danh sách
+                                 window.location.reload(); 
                              } else {
                                  alert("Error: " + (data.error || "Failed to delete game."));
                              }
