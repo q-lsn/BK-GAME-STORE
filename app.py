@@ -61,11 +61,11 @@ def add_game_api():
           g_name = request.form.get('g_name', '').strip()
           g_engine = request.form.get('g_engine', '').strip()
           g_description = request.form.get('g_description', '').strip()
-          p_id = request.form.get('p_id', '').strip()
+          publisher_name = request.form.get('p_id', '').strip()
           released_str = request.form.get('released', '').strip()
 
-          if not g_name or not p_id:
-               return jsonify({'success': False, 'error': 'Tên Game và ID Nhà phát hành là bắt buộc.'}), 400
+          if not g_name or not publisher_name:
+               return jsonify({'success': False, 'error': 'Tên Game và Tên Nhà phát hành là bắt buộc.'}), 400
 
           try:
                released_date = datetime.strptime(released_str, '%Y-%m-%d').date() if released_str else None
@@ -73,10 +73,10 @@ def add_game_api():
                return jsonify({'success': False, 'error': 'Định dạng ngày phát hành không hợp lệ.'}), 400
 
           g_engine_for_sp = g_engine if g_engine else None
-          g_description_for_sp = g_description if g_description else None
+          g_description_for_sp = g_description if g_description else 'No description'
 
           sql_call = "{CALL InsertGame(?, ?, ?, ?, ?)}"
-          params = (g_name, g_engine_for_sp, g_description_for_sp, p_id, released_date)
+          params = (g_name, g_engine_for_sp, g_description_for_sp, publisher_name, released_date)
           cursor.execute(sql_call, params)
           conn.commit()
 

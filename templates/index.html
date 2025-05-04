@@ -197,7 +197,7 @@
                     {# api delete_game nhận item_id #}
                    <span class="delete-item-icon"
                          data-type="game" {# Loại dữ liệu #}
-                         data-item-id="{{ row[''] | default('') }}">&times; Xóa</span> {# Game ID (VARCHAR) #}
+                         data-item-id="{{ row['game_id'] | default('') }}">&times; Xóa</span> {# Game ID (VARCHAR) #}
                </td>
             </tr>
             {% endfor %}
@@ -230,8 +230,8 @@
                 </div>
                 <br>
                  <div>
-                    <label for="publisher_id">Publisher ID:</label><br> {# SP InsertGame nhận Publisher ID #}
-                    <input type="text" id="publisher_id" name="p_id" required> {# Sử dụng name="p_id" khớp với API #}
+                    <label for="p_id">Publisher Name:</label><br> {# SP InsertGame nhận Publisher Name #}
+                    <input type="text" id="publisher_name" name="p_id" required> {# Sử dụng name="p_id" khớp với API #}
                 </div>
                 <br>
                  <div>
@@ -377,9 +377,6 @@
                     const gameId = link.getAttribute('data-id');
                     const gameName = link.getAttribute('data-game-name');
                     const gameDescription = link.getAttribute('data-game-description');
-                    // Lấy data attributes price/tradeable nếu có
-                    // const productPrice = link.getAttribute('data-product-price');
-                    // const tradeable = link.getAttribute('data-tradeable');
 
 
                     if (!gameId) {
@@ -394,10 +391,6 @@
                     if(editGameIdInput) editGameIdInput.value = gameId;
                     if(editGameNameInput) editGameNameInput.value = gameName !== null ? gameName : '';
                     if(editGameDescriptionInput) editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
-                    // Điền data price/tradeable nếu có
-                    // if(editProductPriceInput) editProductPriceInput.value = productPrice !== null ? productPrice : '';
-                    // if(editTradeableInput) editTradeableInput.value = tradeable !== null ? tradeable : '';
-
 
                     // Hiện modal sửa game
                     showModal(editModal);
@@ -423,7 +416,7 @@
 
 
         // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX ---
-        if(addForm) { // Chỉ gán nếu form tồn tại
+        if(addForm) {
              addForm.onsubmit = function(event) {
                  event.preventDefault();
 
@@ -434,35 +427,32 @@
                      body: formData
                  })
                  .then(response => {
-                     if (!response.ok) {
-                         // Handle non-JSON errors if necessary, but assume JSON error format for API
-                         return response.json().then(data => {
-                             throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                         }).catch(() => { // Catch JSON parse error on non-ok response
-                             return response.text().then(text => {
-                                 throw new Error(`Non-JSON error response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                             });
-                         });
-                     }
-                     // Handle potential non-JSON success responses if necessary
-                     return response.json().catch(() => { // Catch JSON parse error on ok response
-                         return response.text().then(text => {
-                              throw new Error(`Unexpected non-JSON success response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                         });
-                     });
+                     // Luôn thử đọc response như JSON ĐÚNG MỘT LẦN
+                     // Sau đó kiểm tra response.ok để xử lý thành công/lỗi API
+                     return response.json().then(data => ({ data, status: response.status, ok: response.ok }));
                  })
-                 .then(data => {
-                     if (data.success) {
-                         alert(data.message || "Game added successfully!");
+                 .then(({ data, status, ok }) => {
+                     // Xử lý dữ liệu đã đọc được và trạng thái response
+                     if (ok) {
+                         // Case API thành công (HTTP status 2xx)
+                         alert(data.message || "Thêm game thành công!");
                          hideModal(addModal);
                          window.location.reload(); // Tải lại trang để cập nhật danh sách
                      } else {
-                          alert("Error: " + (data.error || "Failed to add game."));
+                         // Case API báo lỗi (HTTP status không phải 2xx, nhưng response body vẫn là JSON)
+                         // data.error là thông báo lỗi từ backend API
+                         alert("Lỗi: " + (data.error || `Yêu cầu thất bại với trạng thái ${status}`));
                      }
                  })
                  .catch(error => {
-                     console.error('Error:', error);
-                     alert("An error occurred: " + error.message);
+                     // Case lỗi network hoặc lỗi khi parsing JSON response
+                     console.error('Lỗi Fetch hoặc xử lý Response:', error);
+                      // Kiểm tra xem lỗi có phải do JSON parsing không thành công không
+                     if (error.message.includes('JSON parse error') || error.message.includes('Unexpected token') || error.message.includes('Unexpected non-JSON')) {
+                          alert("Đã xảy ra lỗi bất ngờ. Phản hồi từ máy chủ không phải là định dạng JSON hợp lệ.");
+                     } else {
+                          alert("Đã xảy ra lỗi: " + error.message);
+                     }
                  });
              };
         }
