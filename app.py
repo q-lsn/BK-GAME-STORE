@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, flash, jsonify
 import pyodbc
 from decimal import Decimal
-from datetime import datetime, date
+from datetime import datetime
 
 # --- Cấu hình ứng dụng Flask ---
 app = Flask(__name__)
