@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Gọi Hàm SQL</title>
+    <title>Demo Gọi Hàm SQL - Hệ Cơ Sở Dữ Liệu Steam</title> {# Updated title #}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {# Remove internal style tag #}
 </head>
 <body>
     <div class="container">
@@ -20,98 +21,115 @@
             {% endif %}
         {% endwith %}
 
-        <div class="function-section">
+        {# Function 1: CalculateUserSpending #}
+        <div class="function-section"> {# Use function-section class #}
             <h2>Hàm CalculateUserSpending (Tổng chi tiêu User)</h2>
-            <p>Tính tổng số tiền mà một người dùng đã chi tiêu trong một khoảng thời gian cụ thể.</p>
+            <p class="limitation-note">Tính tổng số tiền mà một người dùng đã chi tiêu trong một khoảng thời gian cụ thể.</p> {# Use limitation-note class #}
 
             <form action="{{ url_for('functions_demo') }}" method="post">
                 <input type="hidden" name="action" value="call_func1">
 
                 <div>
                     <label for="func1_user_id">User ID (CHAR(6), ví dụ: UI0001):</label><br>
+                    {# Preserve input value after POST #}
                     <input type="text" id="func1_user_id" name="user_id" value="{{ func1_input.user_id if func1_input else '' }}" required>
                 </div>
-
                 <div>
                     <label for="func1_start_date">Ngày bắt đầu:</label><br>
-                     <input type="date" id="func1_start_date" name="start_date" value="{{ func1_input.start_date if func1_input else '' }}" required>
+                    {# Preserve input value after POST #}
+                    <input type="date" id="func1_start_date" name="start_date" value="{{ func1_input.start_date if func1_input else '' }}" required>
                 </div>
-
                 <div>
                     <label for="func1_end_date">Ngày kết thúc:</label><br>
+                    {# Preserve input value after POST #}
                     <input type="date" id="func1_end_date" name="end_date" value="{{ func1_input.end_date if func1_input else '' }}" required>
                 </div>
 
-                <button type="submit">Gọi Hàm 1</button>
+                <button type="submit">Tính Tổng Chi Tiêu</button> {# Use default button style #}
             </form>
 
-            {% if func1_result is not none %}
-            <div class="results-area">
-                <h3>Kết quả:</h3>
-                 {% if func1_result.error %}
-                    <p class="error-message">Lỗi: {{ func1_result.error }}</p>
-                {% elif func1_result.success %}
-                    <p>Tổng chi tiêu: {{ func1_result.total_spending | default(0.00) }}</p>
-                {% else %}
-                     <p>Không có kết quả.</p>
-                {% endif %}
-            </div>
+            {% if func1_result %}
+                 <div class="results-area"> {# Use results-area class #}
+                     <h3>Kết Quả:</h3>
+                     {% if func1_result.success %}
+                         {# Use success class for result text #}
+                         <p class="success">Tổng chi tiêu của User ID "{{ func1_input.user_id }}" từ {{ func1_input.start_date }} đến {{ func1_input.end_date }} là: {{ func1_result.total_spending }}</p>
+                     {% else %}
+                          {# Use danger class for error text #}
+                          <p class="danger">{{ func1_result.error }}</p>
+                     {% endif %}
+                 </div>
             {% endif %}
         </div>
 
-        <div class="function-section">
+        {# Function 2: CalculateAvrgReviewScore #}
+        <div class="function-section"> {# Use function-section class #}
             <h2>Hàm CalculateAvrgReviewScore (Điểm đánh giá trung bình Game)</h2>
-             <p>Tính toán điểm đánh giá trung bình, số lượng và phân loại đánh giá cho một game.</p>
+             <p class="limitation-note">Tính điểm đánh giá trung bình, phân loại và phần trăm đánh giá tích cực cho một game.</p> {# Use limitation-note class #}
 
             <form action="{{ url_for('functions_demo') }}" method="post">
                 <input type="hidden" name="action" value="call_func2">
 
                 <div>
-                    <label for="func2_game_id">Game ID (CHAR(6), ví dụ: GA0001):</label><br>
-                     <input type="text" id="func2_game_id" name="game_id" value="{{ func2_input.game_id if func2_input else '' }}" required>
+                    <label for="func2_game_id">Game ID (VARCHAR(6), ví dụ: GA0001):</label><br>
+                    {# Preserve input value after POST #}
+                    <input type="text" id="func2_game_id" name="game_id" value="{{ func2_input.game_id if func2_input else '' }}" required>
                 </div>
 
-                <button type="submit">Gọi Hàm 2</button>
+                <button type="submit">Xem Đánh Giá</button> {# Use default button style #}
             </form>
 
-             {% if func2_result is not none %}
-            <div class="results-area">
-                <h3>Kết quả:</h3>
-                {% if func2_result.error %}
-                    <p class="error-message">Lỗi: {{ func2_result.error }}</p>
-                {% elif func2_result.success and func2_result.results %}
-                     <table>
-                         <thead>
-                             <tr>
-                                 {% for col in func2_result.results[0].keys() %}
-                                     <th>{{ col }}</th>
-                                 {% endfor %}
-                             </tr>
-                         </thead>
-                         <tbody>
-                             {% for row in func2_result.results %}
+            {% if func2_result %}
+            <div class="results-area"> {# Use results-area class #}
+                <h3>Kết Quả:</h3>
+                {% if func2_result.success %}
+                     {% if func2_result.results %}
+                         {# Use results-table class and add ID for potential future sorting/filtering #}
+                         <table class="results-table" id="reviewScoreTable">
+                             <thead>
                                  <tr>
-                                     {% for value in row.values() %}
-                                         <td>{{ value | default('N/A') }}</td>
-                                     {% endfor %}
+                                     {# Add sortable class if you want to enable client-side sorting #}
+                                     <th>Game ID</th>
+                                     <th>Game Name</th>
+                                     <th>Average Rating</th>
+                                     <th>Total Reviews</th>
+                                     <th>Rating Category</th>
+                                     <th>Positive Review %</th>
                                  </tr>
-                             {% endfor %}
-                         </tbody>
-                     </table>
+                             </thead>
+                             <tbody>
+                                 {% for row in func2_result.results %}
+                                     <tr>
+                                         {# Add data-label for mobile stacking #}
+                                         <td data-label="Game ID">{{ row['GameID'] | default('N/A') }}</td>
+                                         <td data-label="Game Name">{{ row['GameName'] | default('N/A') }}</td>
+                                         <td data-label="Average Rating">{{ row['AverageRaiting'] | default(0) }}</td>
+                                         <td data-label="Total Reviews">{{ row['TotalsReviews'] | default(0) }}</td>
+                                         <td data-label="Rating Category">{{ row['RatingCategory'] | default('Unknown') }}</td>
+                                         <td data-label="Positive Review %">{{ row['PositiveReviewPercent'] | default(0) }}%</td> {# Add % #}
+                                     </tr>
+                                 {% endfor %}
+                             </tbody>
+                         </table>
+                    {% else %}
+                         <p>Không có kết quả được trả về từ hàm.</p>
+                    {% endif %}
                 {% else %}
-                     <p>Không có kết quả được trả về từ hàm.</p>
+                     {# Use danger class for error text #}
+                     <p class="danger">{{ func2_result.error }}</p>
                 {% endif %}
             </div>
             {% endif %}
         </div>
 
-        <div class="back-link-container">
-            <a href="{{ url_for('index') }}">Quay lại Trang Chủ</a>
+        <div class="back-link-container"> {# Use back-link-container class #}
+            <a href="{{ url_for('index') }}" class="button-link secondary-button">Quay lại Trang Chủ</a> {# Use button-link and secondary style #}
         </div>
 
     </div>
 
      <script>
+         // Flash message fade out script (can be moved to a common script.js later)
          window.addEventListener('load', function() {
             const flashMessages = document.querySelectorAll('.flashes li');
             flashMessages.forEach(msg => {
@@ -119,10 +137,11 @@
                     msg.classList.add('fade-out');
                     setTimeout(() => {
                         msg.remove();
-                    }, 500);
-                }, 5000);
+                    }, 500); // Match CSS transition speed
+                }, 5000); // Message fades out after 5 seconds
             });
         });
+        // No other JavaScript needed for this page currently
     </script>
 
 </body>

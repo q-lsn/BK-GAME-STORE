@@ -3,32 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - Hệ Cơ Sở Dữ Liệu</title>
+    <title>Trang Chủ - Hệ Cơ Sở Dữ Liệu Steam</title> {# Updated title #}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        /* Basic centering for home page */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-            text-align: center;
-        }
-        .home-links a {
-            margin: 10px; /* Space between links */
-        }
-    </style>
+    {# Remove internal style tag as all styles are now in style.css #}
 </head>
 <body>
     <div class="container">
-        <h1>Chào mừng đến với Ứng dụng hệ cơ sở dữ liệu</h1>
+        <h1>Chào mừng đến với Ứng dụng quản lý Game Steam</h1> {# Updated title #}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
         <div class="home-links">
-            <a href="{{ url_for('list_data') }}" class="button-link">Xem Danh Sách Game</a>
-            <a href="{{ url_for('functions_demo') }}" class="button-link">Demo Gọi Hàm SQL</a>
+            {# Use button-link class for button-like appearance #}
+            {# Add steam-green class for a prominent button #}
+            <a href="{{ url_for('list_data') }}" class="button-link steam-green">Xem Danh Sách Game</a>
+            <a href="{{ url_for('functions_demo') }}" class="button-link secondary-button">Demo Gọi Hàm SQL</a> {# Secondary button #}
+            <a href="{{ url_for('reports') }}" class="button-link secondary-button">Xem Báo Cáo & Lọc</a> {# Secondary button #}
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {# We don't have script.js yet, so let's remove this line for now #}
+    {# If you add a common script.js later, you can add it back #}
+    {# <script src="{{ url_for('static', filename='script.js') }}"></script> #}
+
+    <script>
+        // Flash message fade out script (can be moved to a common script.js later)
+        window.addEventListener('load', function() {
+           const flashMessages = document.querySelectorAll('.flashes li');
+           flashMessages.forEach(msg => {
+               setTimeout(() => {
+                   msg.classList.add('fade-out');
+                   setTimeout(() => {
+                       msg.remove();
+                   }, 500); // Match CSS transition speed
+               }, 5000); // Message fades out after 5 seconds
+           });
+        });
+    </script>
+
 </body>
 </html>

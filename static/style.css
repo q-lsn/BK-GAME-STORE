@@ -1,390 +1,649 @@
-/* static/style.css */
+/* static/style.css - Modernized */
+
+/* --- CSS Variables for Theme --- */
+:root {
+    --primary-color: #007bff; /* Blue */
+    --secondary-color: #6c757d; /* Gray */
+    --accent-color: #28a745; /* Green */
+    --danger-color: #dc3545; /* Red */
+    --warning-color: #ffc107; /* Yellow */
+    --info-color: #17a2b8; /* Cyan */
+
+    --background-color: #f8f9fa; /* Lightest gray */
+    --surface-color: #ffffff; /* White */
+    --text-color: #212529; /* Dark gray */
+    --text-muted: #6c757d; /* Muted gray */
+
+    --border-color: #dee2e6; /* Light border */
+    --divider-color: #e9ecef; /* Lighter border for dividers */
+
+    --spacing-unit: 8px;
+    --border-radius: 5px;
+    --box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
+    --box-shadow-medium: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+    --transition-speed: 0.3s; /* Speed for hover/state transitions */
+}
+
 
 /* --- Basic and Common Styles --- */
 body {
-    font-family: sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Modern font stack */
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-    color: #333;
+    padding: calc(var(--spacing-unit) * 4); /* 32px padding */
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh; /* Full viewport height */
+    display: flex; /* Use flex for centering/layout */
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
 }
 
 .container {
-    max-width: 960px;
-    margin: 20px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1, h2, h3 {
-    color: #333;
-    margin-top: 0; /* Remove default top margin for headings */
-}
-
-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+    max-width: 1000px; /* Max width for content */
+    margin: 0 auto; /* Center container */
+    background: var(--surface-color);
+    padding: calc(var(--spacing-unit) * 3); /* 24px padding */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-medium); /* Medium shadow */
+    flex-grow: 1; /* Allow container to grow */
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 4); /* Space between sections */
 }
 
-th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color);
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 16px margin below headings */
+    font-weight: 600; /* Semi-bold headings */
 }
 
-th {
-    background-color: #f2f2f2;
-}
+h1 { font-size: 2em; } /* 32px default */
+h2 { font-size: 1.6em; } /* 25.6px default */
+h3 { font-size: 1.3em; } /* 20.8px default */
 
+
+/* --- Flash Messages --- */
 .flashes {
     list-style: none;
     padding: 0;
-    margin-bottom: 20px;
+    margin: 0 0 calc(var(--spacing-unit) * 3) 0; /* 24px margin bottom */
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Contain rounded corners */
 }
 
 .flashes li {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
+    padding: calc(var(--spacing-unit) * 2); /* 16px padding */
+    margin-bottom: var(--spacing-unit); /* 8px space between messages */
+    color: #fff; /* White text for flash messages */
+    font-weight: bold;
+    opacity: 1;
+    transition: opacity var(--transition-speed) ease-in-out;
 }
 
-.flashes li.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
+.flashes li.fade-out {
+    opacity: 0;
 }
 
-.flashes li.danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
+.flashes li.success { background-color: var(--accent-color); }
+.flashes li.danger { background-color: var(--danger-color); }
+.flashes li.warning { background-color: var(--warning-color); color: var(--text-color); } /* Dark text for yellow */
+.flashes li.info { background-color: var(--info-color); }
+
+/* Remove bottom margin for the last flash message */
+.flashes li:last-child {
+    margin-bottom: 0;
 }
 
-.flashes li.warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border-color: #ffeeba;
-}
 
-form {
-    margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-}
-
+/* --- Forms --- */
 form div {
-    margin-bottom: 10px;
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 16px space between form groups */
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    display: block; /* Label on its own line */
+    margin-bottom: var(--spacing-unit); /* 8px space below label */
+    font-weight: 600; /* Semi-bold labels */
+    color: var(--text-color);
 }
 
 input[type="text"],
 input[type="date"],
 input[type="number"],
+input[type="email"], /* Added email type */
+input[type="password"], /* Added password type */
 select,
 textarea {
-    width: calc(100% - 22px); /* Adjust for padding and border */
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    width: 100%; /* Full width */
+    padding: var(--spacing-unit); /* 8px padding */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-sizing: border-box; /* Include padding and border in element's total width */
+    font-size: 1em;
+    color: var(--text-color);
+    background-color: var(--surface-color);
+    transition: border-color var(--transition-speed) ease-in-out, box-shadow var(--transition-speed) ease-in-out;
 }
 
-button {
-    padding: 10px 15px;
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 5px;
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus ring effect */
+    outline: none; /* Remove default outline */
 }
 
-button:hover {
-    background-color: #4cae4c;
+textarea {
+    min-height: 150px; /* Default height for textareas */
+    resize: vertical; /* Allow vertical resizing */
 }
 
-.cancel-button {
-    background-color: #f0ad4e;
-}
-.cancel-button:hover {
-    background-color: #ec971f;
-}
 
-.button-link {
+/* --- Buttons --- */
+button,
+.button-link { /* Apply button styles to button-link class */
     display: inline-block;
-    padding: 10px 15px;
-    background-color: #0275d8;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-
-.button-link:hover {
-    background-color: #025aa5;
-}
-
-.actions a, .actions span {
-    margin-right: 8px; /* Increase spacing */
-    text-decoration: none;
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 3); /* 8px top/bottom, 24px left/right */
+    font-size: 1em;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none; /* Remove underline from links */
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    color: #0275d8;
-}
-.actions span.delete-item-icon {
-    color: #d9534f;
+    transition: background-color var(--transition-speed) ease-in-out, border-color var(--transition-speed) ease-in-out, color var(--transition-speed) ease-in-out, opacity var(--transition-speed) ease-in-out;
 }
 
+/* Primary Button */
+button[type="submit"],
+button:not(.cancel-button):not(.secondary-button), /* Default button style */
+.button-link:not(.cancel-button):not(.secondary-button) {
+     background-color: var(--primary-color);
+     color: #fff; /* White text */
+     border-color: var(--primary-color);
+}
+
+button[type="submit"]:hover,
+button:not(.cancel-button):not(.secondary-button):hover,
+.button-link:not(.cancel-button):not(.secondary-button):hover {
+     background-color: darken(var(--primary-color), 10%); /* Darken color on hover */
+     border-color: darken(var(--primary-color), 12%);
+}
+
+/* Secondary Button */
+.secondary-button {
+     background-color: var(--secondary-color);
+     color: #fff;
+     border-color: var(--secondary-color);
+}
+.secondary-button:hover {
+     background-color: darken(var(--secondary-color), 10%);
+     border-color: darken(var(--secondary-color), 12%);
+}
+
+
+/* Cancel/Danger Button */
+.cancel-button,
+button.danger {
+    background-color: var(--danger-color);
+    color: #fff;
+    border-color: var(--danger-color);
+}
+.cancel-button:hover,
+button.danger:hover {
+     background-color: darken(var(--danger-color), 10%);
+     border-color: darken(var(--danger-color), 12%);
+}
+
+/* Button disabled state */
+button:disabled,
+button:disabled:hover {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+/* --- Tables --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: calc(var(--spacing-unit) * 3); /* 24px margin bottom */
+    box-shadow: var(--box-shadow-light); /* Light shadow for tables */
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Ensure rounded corners on table */
+}
+
+th, td {
+    padding: var(--spacing-unit) calc(var(--spacing-unit) * 1.5); /* 8px top/bottom, 12px left/right */
+    border: 1px solid var(--divider-color); /* Lighter border for cells */
+    text-align: left;
+}
+
+th {
+    background-color: var(--divider-color); /* Light grey header background */
+    font-weight: 600;
+    color: var(--text-color);
+    position: relative; /* For sorting arrows */
+    cursor: pointer; /* Indicate sortable */
+}
+ th:last-child {
+     padding-right: calc(var(--spacing-unit) * 1.5); /* No space needed for arrow on last header */
+ }
+
+
+td {
+    background-color: var(--surface-color);
+}
+
+/* Zebra striping for table rows */
+tbody tr:nth-child(even) td {
+    background-color: #f2f2f2; /* Slightly darker shade for even rows */
+}
+
+/* Hover effect for table rows */
+tbody tr:hover td {
+    background-color: #e9ecef; /* Highlight row on hover */
+    transition: background-color var(--transition-speed) ease-in-out;
+}
+
+/* Table Actions Column */
+.actions {
+    white-space: nowrap;
+    text-align: center;
+    min-width: 120px; /* Ensure action column has space */
+}
+.actions a, .actions span {
+    margin: 0 var(--spacing-unit); /* Space between action links/icons */
+    text-decoration: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: color var(--transition-speed) ease-in-out;
+}
 .actions a:hover, .actions span:hover {
-    text-decoration: underline;
+    color: darken(var(--primary-color), 15%);
+}
+.actions .delete-item-icon {
+    color: var(--danger-color);
+}
+.actions .delete-item-icon:hover {
+    color: darken(var(--danger-color), 15%);
 }
 
 
-/* Modal styles (essential for functionality) */
+/* --- Modals --- */
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    z-index: 1000; /* Sit on top */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    padding-top: 60px; /* Space from top */
+    background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Blur background */
+    -webkit-backdrop-filter: blur(5px); /* Safari support */
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 5% auto; /* Reduced margin from top */
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more responsive */
-    max-width: 500px;
-    border-radius: 8px;
-    position: relative;
+    background-color: var(--surface-color);
+    margin: 5% auto; /* 15% from the top and centered */
+    padding: calc(var(--spacing-unit) * 4); /* 32px padding */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-medium);
+    max-width: 500px; /* Increased max width */
+    position: relative; /* For close button positioning */
+    animation: fadeInScale 0.3s ease-out; /* Animation on open */
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 .modal-content h2 {
     margin-top: 0;
-    margin-bottom: 15px; /* Add space below title */
+    margin-bottom: calc(var(--spacing-unit) * 3); /* More space below modal title */
+    color: var(--primary-color);
 }
 
 .close-button {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+    color: var(--text-muted);
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: calc(var(--spacing-unit) * 2); /* 16px from top */
+    right: calc(var(--spacing-unit) * 2); /* 16px from right */
+    font-size: 24px;
+    font-weight: bold;
+    transition: color var(--transition-speed) ease-in-out;
     cursor: pointer;
 }
 
 .close-button:hover,
 .close-button:focus {
-    color: #333;
+    color: var(--text-color);
     text-decoration: none;
 }
 
-/* --- Home Page Specific Styles --- */
-/* Styles already embedded in home.html can be moved here */
-body.home { /* Add a class="home" to your body tag in home.html */
+/* Style for forms inside modals */
+.modal-content form {
+     margin-top: calc(var(--spacing-unit) * 3); /* Space above form */
+}
+.modal-content form button {
+    margin-right: var(--spacing-unit); /* Space between buttons */
+}
+
+
+/* --- Specific Page Styles / Sections --- */
+
+/* Home Page Styles */
+.home-links {
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    flex-direction: column;
-    text-align: center;
-    padding: 20px; /* Ensure padding is applied */
+    gap: calc(var(--spacing-unit) * 3); /* Space between links */
+    margin-top: calc(var(--spacing-unit) * 4); /* Space below title */
+    flex-wrap: wrap; /* Allow wrapping */
 }
-
-.home .container { /* Apply container styles within home context */
-     margin: 0; /* Remove auto margin if body is flex centered */
-     padding: 30px; /* Add more padding for home container */
-     text-align: center;
-}
-
-.home-links {
-    margin-top: 20px; /* Add space above links */
-}
-
 .home-links .button-link {
-    margin: 10px; /* Space between links */
+    min-width: 180px; /* Ensure buttons have a minimum width */
+    text-align: center;
 }
 
 
-/* --- Index Page Specific Styles --- */
-/* Styles for the simple game list */
-.game-list-simple {
-    list-style: none;
-    padding: 0;
-    margin: 0; /* Remove default margin */
+/* Data List Page Styles (index.html) */
+.header-container {
+    text-align: center;
+    margin-bottom: calc(var(--spacing-unit) * 4);
 }
 
-.game-list-simple li {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    margin-bottom: 15px; /* Increase space between items */
-    padding: 15px;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.game-list-simple li h3 {
-    margin-bottom: 5px; /* Reduce space below title */
-    color: #0275d8; /* Highlight game name */
-}
-
-.game-list-simple li p {
-    margin: 5px 0; /* Space between paragraphs */
-    color: #555; /* Darker text for info */
-}
-
-.game-list-simple li strong {
-    margin-right: 10px;
-    color: #333;
-    font-weight: bold; /* Ensure boldness */
-}
-
-.game-list-simple .item-actions {
-    margin-top: 15px; /* Add space above actions */
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
-
-/* Style for the controls container on index page */
 .controls-container {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee; /* Optional separator */
+    background-color: var(--background-color);
+    padding: calc(var(--spacing-unit) * 2);
+    border-radius: var(--border-radius);
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    flex-wrap: wrap;
+    align-items: flex-end; /* Align items to the bottom */
+    margin-bottom: calc(var(--spacing-unit) * 4);
+    border: 1px solid var(--divider-color);
 }
-.controls-container .button-link {
-    margin-bottom: 0; /* Remove bottom margin if used within controls */
+ .controls-container div {
+     flex-grow: 1; /* Allow input groups to grow */
+     min-width: 180px; /* Minimum width for input groups */
+     margin-bottom: 0; /* Remove margin from inner div */
+ }
+.controls-container label {
+    margin-bottom: var(--spacing-unit); /* Space between label and input */
+}
+.controls-container button {
+    margin-top: auto; /* Push button to the bottom if items wrap */
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+/* Style for the game list table on index.html */
+.game-list-table {
+     margin-top: 0; /* Remove extra margin if controls are above */
 }
 
 
-/* --- Procedures Demo Page Specific Styles --- */
-/* Style for sections containing forms and results */
-.content-section {
-    margin-bottom: 30px; /* Space between sections */
-    padding: 20px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+/* Functions Demo Page Styles (functions_demo.html) */
+.function-section {
+    margin-bottom: calc(var(--spacing-unit) * 5); /* More space between sections */
+    padding: calc(var(--spacing-unit) * 3);
+    border: 1px solid var(--divider-color);
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
 }
-
-.content-section h2 {
-    margin-bottom: 15px;
-    color: #0275d8; /* Highlight section title */
-    border-bottom: 2px solid #0275d8; /* Add a line below title */
-    padding-bottom: 5px;
+.function-section h2 {
+    color: var(--primary-color); /* Match reports section title color */
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: var(--spacing-unit) * 1.5;
+    margin-bottom: calc(var(--spacing-unit) * 3);
 }
-
-.content-section form {
-    margin-bottom: 15px; /* Space between form and results area */
-    border: none; /* Remove border if .content-section has one */
-    padding: 0; /* Remove padding if .content-section has one */
-    background: none; /* Remove background if .content-section has one */
+.function-section form div {
+     margin-bottom: calc(var(--spacing-unit) * 1.5); /* Smaller margin in function forms */
+}
+.function-section form button {
+     margin-top: var(--spacing-unit); /* Space above button */
 }
 
 .results-area {
-    margin-top: 15px; /* Space above results */
-    padding: 15px;
-    border: 1px dashed #ccc; /* Dotted border for results */
-    border-radius: 4px;
-    background-color: #fff;
+     margin-top: calc(var(--spacing-unit) * 3);
+     padding: calc(var(--spacing-unit) * 2);
+     border: 1px dashed var(--secondary-color); /* Different border style */
+     border-radius: var(--border-radius);
+     background-color: #fff;
+     box-shadow: var(--box-shadow-light);
 }
-
 .results-area h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #555;
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    color: var(--secondary-color); /* Different color for results title */
 }
 
-/* Style for single result paragraphs */
 .results-area p {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #333; /* Default color for results */
+    margin: var(--spacing-unit) 0;
 }
 
-/* Optional: Add color indicators for specific results */
-.results-area p#avgReviewResult {
-     /* Maybe a neutral or informative color */
-     color: #007bff;
+/* Specific result styles */
+.results-area p.success { color: var(--accent-color); font-weight: bold; }
+.results-area p.danger { color: var(--danger-color); font-weight: bold; }
+
+
+/* Reports Page Styles (reports.html) */
+.report-section {
+    margin-bottom: calc(var(--spacing-unit) * 5); /* More space between sections */
+    padding: calc(var(--spacing-unit) * 3);
+    border: 1px solid var(--divider-color);
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
 }
-.results-area p#userSpendingResult {
-    /* Maybe a success color for spending */
-    color: #28a745;
+
+.report-section h2 {
+    color: var(--primary-color); /* Primary color for report titles */
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: var(--spacing-unit) * 1.5;
+    margin-bottom: calc(var(--spacing-unit) * 3);
 }
+
+.report-section form div {
+     margin-bottom: calc(var(--spacing-unit) * 1.5); /* Smaller margin in report forms */
+}
+.report-section form button {
+     margin-top: var(--spacing-unit); /* Space above button */
+}
+
+.filter-controls, .sort-controls {
+     margin-bottom: calc(var(--spacing-unit) * 2);
+     display: flex;
+     align-items: center;
+     gap: var(--spacing-unit) * 1.5; /* 12px gap */
+     flex-wrap: wrap;
+     padding: var(--spacing-unit); /* Add padding */
+     background-color: #e9ecef; /* Light background for controls */
+     border-radius: var(--border-radius);
+     border: 1px solid var(--divider-color);
+}
+
+.filter-controls label, .sort-controls label {
+    font-weight: normal; /* Less bold for control labels */
+    margin-bottom: 0; /* Remove bottom margin */
+    flex-shrink: 0; /* Prevent label from shrinking */
+}
+
+.filter-controls input[type="text"],
+.sort-controls select {
+    padding: var(--spacing-unit); /* 8px padding */
+    border-color: var(--border-color);
+     background-color: var(--surface-color);
+}
+ .filter-controls input[type="text"] {
+     flex-grow: 1;
+     min-width: 150px;
+ }
+
+ .sort-controls select {
+     min-width: 120px;
+     flex-grow: 1; /* Allow select to grow too */
+ }
+
+ .sort-controls button {
+     padding: var(--spacing-unit) calc(var(--spacing-unit) * 2); /* Smaller padding than main buttons */
+     flex-shrink: 0;
+     margin-top: 0; /* Remove top margin */
+ }
+
+ /* Ensure filter and sort controls don't have extra margin below them when followed by results-area */
+ .filter-controls + .results-area,
+ .sort-controls + .results-area {
+      margin-top: calc(var(--spacing-unit) * 2); /* Adjust margin above results area */
+ }
 
 
 /* Style for the limitation note */
 .limitation-note {
     font-size: 0.9em;
-    color: #777;
-    margin-bottom: 15px;
+    color: var(--text-muted);
+    margin-bottom: calc(var(--spacing-unit) * 2);
     font-style: italic;
 }
 
 /* Style for the back link container */
 .back-link-container {
-    margin-top: 30px;
+    margin-top: calc(var(--spacing-unit) * 4);
     text-align: center;
+    padding-top: calc(var(--spacing-unit) * 3); /* Add space above */
+    border-top: 1px solid var(--divider-color); /* Add a subtle line */
 }
 .back-link-container .button-link {
     margin-bottom: 0;
 }
 
-/* Media Query for smaller screens (optional, but good practice) */
+/* --- General Effects / Transitions --- */
+/* Smooth scrolling for anchor links (optional, but nice) */
+/* html {
+  scroll-behavior: smooth;
+} */
+
+/* Add transitions to common elements */
+a, button, .button-link {
+    transition: opacity var(--transition-speed) ease-in-out, background-color var(--transition-speed) ease-in-out, color var(--transition-speed) ease-in-out, border-color var(--transition-speed) ease-in-out;
+}
+
+/* Table row hover effect handled within table styles */
+
+/* Modal fade-in/scale animation handled within modal styles */
+
+
+/* --- Media Queries for Responsiveness --- */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: calc(var(--spacing-unit) * 2); /* Less padding on smaller screens */
     }
     .container {
-        padding: 15px;
-    }
-    .modal-content {
-        width: 95%;
-        margin: 5% auto;
-    }
-     input[type="text"],
-     input[type="date"],
-     input[type="number"],
-     select,
-     textarea {
-         width: calc(100% - 20px); /* Adjust padding */
-     }
-     .game-list-simple li strong {
-          width: 100px; /* Adjust label width */
-     }
-     .actions a, .actions span {
-         margin-right: 5px; /* Adjust spacing */
-         font-size: 0.9em;
-     }
-     table th, table td {
-         padding: 8px;
-         font-size: 0.9em;
-     }
-    /* Allow horizontal scrolling for tables on small screens if needed */
-    .results-area table {
-        overflow-x: auto;
-        display: block;
-    }
-    .results-area table th, .results-area table td {
-        white-space: nowrap; /* Prevent text wrapping in table cells */
+        padding: calc(var(--spacing-unit) * 2);
+        gap: calc(var(--spacing-unit) * 3); /* Smaller space between sections */
     }
 
+    h1 { font-size: 1.8em; }
+    h2 { font-size: 1.4em; }
+    h3 { font-size: 1.2em; }
+
+    .flashes li {
+         padding: var(--spacing-unit) * 1.5;
+         margin-bottom: var(--spacing-unit) * 0.75;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea,
+    button,
+    .button-link {
+         font-size: 0.95em; /* Slightly smaller font for controls */
+    }
+
+     /* Make table cells stack or scroll on very small screens if necessary */
+     /* This might require more complex table layout changes */
+     table, thead, tbody, th, td, tr {
+          display: block; /* Make elements stack */
+     }
+     thead tr {
+          position: absolute;
+          top: -9999px;
+          left: -9999px; /* Hide table headers visually */
+     }
+     tr { border: 1px solid var(--divider-color); margin-bottom: var(--spacing-unit) * 2; border-radius: var(--border-radius); overflow: hidden; }
+     td {
+          border: none; /* Remove cell borders when stacked */
+          border-bottom: 1px solid var(--divider-color);
+          position: relative;
+          padding-left: 50%; /* Make space for pseudo-element label */
+          text-align: right; /* Align cell content to the right */
+     }
+     td::before {
+         /* Use data attributes or hardcoded labels for pseudo-elements */
+         position: absolute;
+         top: 6px;
+         left: 6px;
+         width: 45%;
+         padding-right: 10px;
+         white-space: nowrap;
+         content: attr(data-label); /* Requires adding data-label attribute to each td in HTML */
+         font-weight: bold;
+         text-align: left; /* Align pseudo-element label to the left */
+         color: var(--text-muted);
+     }
+      /* Hide the pseudo-element for action column */
+      td.actions::before {
+         content: none;
+      }
+      /* Center actions column content */
+      td.actions {
+          text-align: center;
+          padding-left: calc(var(--spacing-unit) * 1.5); /* Reset padding */
+      }
+      /* Ensure filter and sort controls wrap nicely */
+      .filter-controls, .sort-controls, .home-links {
+           flex-direction: column;
+           align-items: stretch; /* Stretch items to fill width */
+      }
+       .filter-controls input[type="text"],
+       .sort-controls select,
+       .filter-controls label,
+       .sort-controls label,
+       .sort-controls button {
+            width: 100%; /* Full width for stacked controls */
+            margin-right: 0;
+            margin-bottom: var(--spacing-unit); /* Add space between stacked controls */
+            text-align: left; /* Align text input/select left */
+       }
+       .sort-controls button {
+           margin-bottom: 0; /* No margin below the button */
+           text-align: center; /* Center button text */
+       }
+        .home-links .button-link {
+            min-width: auto; /* Remove min-width when stacked */
+        }
+}
+
+/* Media Query for very small screens (optional) */
+@media (max-width: 400px) {
+    body {
+        padding: var(--spacing-unit); /* Even less padding */
+    }
+    .container {
+        padding: var(--spacing-unit);
+    }
+     h1 { font-size: 1.5em; }
+     h2 { font-size: 1.3em; }
 }

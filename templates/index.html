@@ -3,442 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Game - Hệ Cơ Sở Dữ Liệu</title>
+    <title>Danh Sách Game - Hệ Cơ Sở Dữ Liệu Steam</title> {# Updated title #}
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        /* Style cụ thể cho index.html (Có thể chuyển một số sang style.css chung nếu muốn) */
-        .header-container {
-            max-width: 1000px;
-            margin: 0 auto 30px auto;
-            text-align: center;
-        }
-
-        .controls-container {
-            max-width: 1000px;
-            margin: 0 auto 20px auto;
-            background-color: #f9f9f9; /* Sử dụng màu nền sáng hơn cho controls */
-            padding: 15px;
-            border-radius: 5px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: flex-start;
-             border: 1px solid #eee; /* Thêm border */
-        }
-
-        /* Style cho bảng danh sách game */
-        .game-list-table {
-             width: 100%;
-             max-width: 1000px; /* Giới hạn chiều rộng bảng */
-             margin: 0 auto;
-             border-collapse: collapse;
-             box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Thêm đổ bóng nhẹ cho bảng */
-        }
-
-        .game-list-table th,
-        .game-list-table td {
-             padding: 10px;
-             border: 1px solid #ddd;
-             text-align: left;
-        }
-
-        .game-list-table th {
-             background-color: #f2f2f2;
-             font-weight: bold;
-             color: #333;
-        }
-
-
-        /* Style cho cột Actions trong bảng */
-        .game-list-table .actions {
-             white-space: nowrap; /* Ngăn wrap nội dung cột actions */
-             text-align: center; /* Căn giữa nội dung cột actions */
-        }
-         .game-list-table .actions a,
-         .game-list-table .actions span {
-              margin: 0 5px; /* Khoảng cách giữa các action */
-         }
-
-    </style>
+    {# Remove internal style tag #}
 </head>
 <body>
+    <div class="container">
+        <div class="header-container">
+            <h1>Danh Sách Game</h1>
+        </div>
 
-    <div class="header-container">
-        <h1>Danh Sách Game</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="controls-container">
+            {# "Add New Game" button #}
+             <button id="addGameBtn" class="steam-green">Thêm Game Mới</button> {# Use steam-green class #}
+        </div>
+
+
+        {# Game List Table #}
+        <table class="results-table game-list-table" id="gameListTable"> {# Use results-table class and add ID #}
+            <thead>
+                <tr>
+                    {# Add class="sortable" to headers you want to be sortable #}
+                    <th class="sortable">Game ID</th>
+                    <th class="sortable">Game Name</th>
+                    <th class="sortable">Engine</th>
+                    <th>Description</th> {# Description might be too long to sort effectively #}
+                    <th class="sortable">Publisher</th>
+                    <th class="sortable">Released Date</th>
+                    <th>Product ID</th> {# Product ID might not be meaningful to sort by #}
+                    <th>Actions</th> {# Actions column is typically not sortable #}
+                </tr>
+            </thead>
+            <tbody>
+                {% if data %}
+                    {% for game in data %}
+                    <tr>
+                        {# Add data-label for mobile stacking #}
+                        <td data-label="Game ID">{{ game['game_id'] | default('N/A') }}</td>
+                        <td data-label="Game Name">{{ game['game_name'] | default('N/A') }}</td>
+                        <td data-label="Engine">{{ game['engine'] | default('N/A') }}</td>
+                        <td data-label="Description">{{ game['game_description'] | default('Không có mô tả') }}</td>
+                        <td data-label="Publisher">{{ game['name'] | default('N/A') }}</td> {# Assuming 'name' from JOIN is Publisher Name #}
+                         {# Format date Released Date #}
+                        <td data-label="Released Date">
+                            {% if game['date_released'] %}
+                                {{ game['date_released'].strftime('%Y-%m-%d') }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td data-label="Product ID">{{ game['product_id'] | default('N/A') }}</td>
+                        <td class="actions" data-label="Actions"> {# Add data-label for consistency, though hidden by CSS #}
+                            <a href="#" class="edit-game-link"
+                                data-id="{{ game['game_id'] | default('') }}"
+                                data-game-name="{{ game['game_name'] | default('') }}"
+                                data-game-description="{{ game['game_description'] | default('') }}"
+                                >Sửa</a>
+                            <span class="delete-item-icon"
+                                data-type="game"
+                                data-item-id="{{ game['game_id'] | default('') }}">&times; Xóa</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        {# colspan should match the number of columns in the header #}
+                        <td colspan="8">Không tìm thấy dữ liệu game nào.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+
+        <div class="back-link-container">
+            <a href="{{ url_for('index') }}" class="button-link secondary-button">Quay lại Trang Chủ</a> {# Use button-link and secondary style #}
+        </div>
+
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul class="flashes">
-            {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    {# --- Modals for Add/Edit Game --- #}
 
-    <div class="controls-container">
-        <a href="#" class="button-link" id="addGameBtn">Thêm Game Mới</a>
-        {# Có thể thêm các control khác ở đây sau (ví dụ: tìm kiếm, lọc) #}
-    </div>
-
-    {# Thay thế div game-list-grid bằng table #}
-    {% if data %}
-    <table class="game-list-table">
-        <thead>
-            <tr>
-                {# THÊM CÁC CỘT HEADER BẠN MUỐN HIỂN THỊ #}
-                <th>Game ID</th> {# Thêm cột Game ID #}
-                <th>Game Name</th>
-                <th>Engine</th>
-                <th>Description</th> {# Thêm cột Description #}
-                <th>Publisher ID</th> {# Cột ID nhà phát hành #}
-                <th>Released Date</th>
-                <th>Product ID</th> {# Thêm cột Product ID #}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in data %}
-            <tr>
-                {# THÊM CÁC Ô DỮ LIỆU (td) CHO TỪNG CỘT #}
-                {# Đảm bảo key trong row[...] khớp với tên cột trả về từ SP #}
-                <td>{{ row['game_id'] | default('N/A') }}</td> {# Hiển thị Game ID #}
-                <td>{{ row['game_name'] | default('N/A') }}</td> {# Hiển thị Game Name #}
-                <td>{{ row['engine'] | default('N/A') }}</td> {# Hiển thị Engine #}
-                <td>{{ row['game_description'] | default('N/A') }}</td> {# Hiển thị Description #}
-                <td>{{ row['game_publisher'] | default('N/A') }}</td> {# Hiển thị Publisher ID (key là 'game_publisher' từ SP của bạn) #}
-                <td>{{ row['date_released'] | default("N/A") }}</td> {# Hiển thị Released Date #}
-                <td>{{ row['product_id'] | default('N/A') }}</td> {# Hiển thị Product ID #}
-                {# Thêm td cho các cột khác nếu có #}
-
-                <td class="actions">
-                    {# Nút Sửa: Sử dụng class edit-item-link và data attributes cần thiết cho modal sửa chung #}
-                    {# Lấy data attributes từ row #}
-                   <a href="#" class="edit-item-link"
-                      data-type="game" {# Loại dữ liệu #}
-                      data-id="{{ row['game_id'] | default('') }}" {# Game ID (VARCHAR) #}
-                      data-game-name="{{ row['game_name'] | default('') }}" {# Game Name #}
-                      >Sửa</a>
-                    {# Nút Xóa: Sử dụng class delete-item-icon và data attributes cần thiết #}
-                    {# api delete_game nhận item_id #}
-                   <span class="delete-item-icon"
-                         data-type="game" {# Loại dữ liệu #}
-                         data-item-id="{{ row['game_id'] | default('') }}">&times; Xóa</span> {# Game ID (VARCHAR) #}
-               </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-     <p style="max-width: 1000px; margin: 20px auto; text-align: center; color: #555;">Không tìm thấy game nào.</p>
-    {% endif %}
-
-    {# --- Cấu trúc Modal Thêm Mới Game (Giữ nguyên) --- #}
-    {# Modal này sử dụng ID addGameModal và các input id/name cụ thể #}
-    <div id="addGameModal" class="modal">
+    {# Add Game Modal #}
+    <div id="addGameModal" class="modal"> {# Use modal class #}
         <div class="modal-content">
-            <span class="close-button add-close">&times;</span>
+            <span class="close-button add-game-close">&times;</span> {# Use close-button class #}
             <h2>Thêm Game Mới</h2>
             <form id="addGameForm" action="{{ url_for('add_game_api') }}" method="post">
-                 <div>
-                    <label for="g_name">Game Name:</label><br>
+                <div>
+                    <label for="g_name">Tên Game:</label><br>
                     <input type="text" id="g_name" name="g_name" required>
                 </div>
-                <br>
                 <div>
                     <label for="g_engine">Engine:</label><br>
                     <input type="text" id="g_engine" name="g_engine">
                 </div>
-                <br>
                  <div>
-                    <label for="g_description">Description:</label><br>
+                    <label for="g_description">Mô tả:</label><br>
                     <textarea id="g_description" name="g_description"></textarea>
                 </div>
-                <br>
                  <div>
-                    <label for="p_id">Publisher Name:</label><br> {# SP InsertGame nhận Publisher Name #}
-                    <input type="text" id="p_id" name="p_id" required> {# Sử dụng name="p_id" khớp với API #}
-                </div>
-                <br>
-                 <div>
-                    <label for="released">Released Date:</label><br>
-                    <input type="date" id="released" name="released">
-                </div>
-                 <br>
-                {# Nếu SP InsertGame mới nhận price/tradeable, thêm các input này #}
-                {#
-                <div>
-                    <label for="product_price">Price:</label><br>
-                    <input type="number" id="product_price" name="product_price" step="0.01" min="0" value="0.00">
-                </div>
-                 <br>
-                 <div>
-                     <label for="tradeable">Tradeable:</label><br>
-                     <select id="tradeable" name="tradeable" required>
-                          <option value="0">No</option>
-                          <option value="1">Yes</option>
-                     </select>
+                    <label for="p_id">Tên Nhà Phát Hành:</label><br> {# API expects Publisher Name #}
+                    <input type="text" id="p_id" name="p_id" required>
                  </div>
-                 <br>
-                #}
-
-                <button type="submit">Lưu Game</button>
-                <button type="button" class="cancel-button add-cancel">Hủy</button>
+                 <div>
+                     <label for="released">Ngày Phát Hành:</label><br>
+                     <input type="date" id="released" name="released">
+                 </div>
+                <button type="submit" class="steam-green">Thêm Game</button> {# Use steam-green style #}
+                <button type="button" class="cancel-button add-game-cancel">Hủy</button> {# Use cancel-button style #}
             </form>
         </div>
     </div>
 
-    <div id="editGameModal" class="modal">
+    {# Edit Game Modal #}
+     <div id="editGameModal" class="modal"> {# Use modal class #}
          <div class="modal-content">
-             <span class="close-button edit-close">&times;</span>
+             <span class="close-button edit-game-close">&times;</span> {# Use close-button class #}
              <h2>Sửa Thông Tin Game</h2>
-
              <form id="editGameForm" action="{{ url_for('update_game_api') }}" method="post">
-                  <input type="hidden" id="edit_game_id" name="game_id"> {# Input ẩn cho Game ID #}
-
+                  <input type="hidden" id="edit_game_id" name="game_id">
                   <div>
-                     <label for="edit_g_name">Game Name:</label><br>
+                     <label for="edit_g_name">Tên Game:</label><br>
                      <input type="text" id="edit_g_name" name="g_name" required>
                  </div>
                  <br>
-
                   <div>
-                     <label for="edit_g_description">Description:</label><br>
+                     <label for="edit_g_description">Mô tả:</label><br>
                      <textarea id="edit_g_description" name="g_description"></textarea>
                  </div>
                  <br>
-                 {# Nếu UpdateGameInfo SP mới nhận price/tradeable, thêm các input này #}
-                 {#
-                 <div>
-                     <label for="edit_product_price">Price:</label><br>
-                     <input type="number" id="edit_product_price" name="product_price" step="0.01" min="0">
-                 </div>
-                 <br>
-                  <div>
-                      <label for="edit_tradeable">Tradeable:</label><br>
-                      <select id="edit_tradeable" name="tradeable" required>
-                          <option value="0">No</option>
-                          <option value="1">Yes</option>
-                      </select>
-                  </div>
-                  <br>
-                 #}
-
-                 <button type="submit">Lưu Thay Đổi</button>
-                 <button type="button" class="cancel-button edit-cancel">Hủy</button>
+                 <button type="submit" class="steam-green">Lưu Thay Đổi</button> {# Use steam-green style #}
+                 <button type="button" class="cancel-button edit-game-cancel">Hủy</button> {# Use cancel-button style #}
              </form>
-
          </div>
      </div>
 
 
     <script>
-        // --- Lấy các phần tử DOM cho cả hai Modal Game ---
-        // Modal Thêm Mới
-        var addModal = document.getElementById("addGameModal");
-        var addBtn = document.getElementById("addGameBtn");
-        var addCloseSpan = addModal ? addModal.querySelector(".close-button") : null;
-        var addCancelButton = addModal ? addModal.querySelector(".cancel-button") : null;
-        var addForm = document.getElementById("addGameForm");
-
-        // Modal Sửa Game
-        var editModal = document.getElementById("editGameModal");
-        var editCloseSpan = editModal ? editModal.querySelector(".close-button") : null;
-        var editCancelButton = editModal ? editModal.querySelector(".cancel-button") : null;
-        var editForm = document.getElementById("editGameForm");
-        var editGameIdInput = document.getElementById("edit_game_id");
-        var editGameNameInput = document.getElementById("edit_g_name");
-        var editGameDescriptionInput = document.getElementById("edit_g_description");
-
-        var editLinks = document.querySelectorAll(".game-list-table .actions .edit-item-link"); // Sử dụng class mới edit-item-link
-        var deleteIcons = document.querySelectorAll(".game-list-table .actions .delete-item-icon"); // Sử dụng class mới delete-item-icon
-
-
-        // --- Hàm để Hiện/Ẩn Modal (chung) ---
+        // --- Common Modal Functions ---
         function showModal(modalElement) {
              if (modalElement) {
-                  modalElement.style.display = "block";
+                  modalElement.style.display = "flex"; // Use flex to center content with CSS
+                  // Add class for CSS animation
+                  setTimeout(() => { modalElement.classList.add('is-visible'); }, 10); // Small delay to allow display to change
               }
         }
 
         function hideModal(modalElement) {
              if (modalElement) {
-                 modalElement.style.display = "none";
+                  // Remove class to trigger reverse animation
+                  modalElement.classList.remove('is-visible');
+                   // Hide after animation completes
+                  modalElement.addEventListener('transitionend', function handler() {
+                       modalElement.style.display = "none";
+                       modalElement.removeEventListener('transitionend', handler); // Clean up listener
+                   });
+
                  const form = modalElement.querySelector('form');
                  if (form) {
-                      form.reset();
+                      form.reset(); // Reset form inputs when closing
                  }
              }
         }
 
+        // --- Flash Message Fade Out ---
+        window.addEventListener('load', function() {
+            const flashMessages = document.querySelectorAll('.flashes li');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.classList.add('fade-out');
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500); // Match CSS transition speed
+                }, 5000); // Message fades out after 5 seconds
+            });
+        });
 
-        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Thêm Game ---
-        if(addBtn && addModal) { 
-             addBtn.onclick = function(event) {
-                 event.preventDefault();
-                 showModal(addModal);
-             }
-             if(addCloseSpan) addCloseSpan.onclick = function() { hideModal(addModal); }
-             if(addCancelButton) addCancelButton.onclick = function() { hideModal(addModal); }
-        }
+        // --- Table Sorting ---
+         function sortTable(tableId, column, type) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            const tbody = table.getElementsByTagName("tbody")[0];
+            const rows = Array.from(tbody.getElementsByTagName("tr")); // Convert HTMLCollection to Array
+
+            const header = table.getElementsByTagName("th")[column];
+            // Get sort direction, defaulting to 'asc' for button sort, or toggling for header click
+            let sortDirection = header.getAttribute('data-sort-dir') || 'asc'; // Default direction
 
 
-        // --- Xử lý sự kiện Hiện/Ẩn cho Modal Sửa Game và Đọc dữ liệu từ HTML ---
-        if(editLinks && editModal) { 
-            editLinks.forEach(link => {
-                link.onclick = function(event) {
-                    event.preventDefault();
-
-                    const gameId = link.getAttribute('data-id');
-                    const gameName = link.getAttribute('data-game-name');
-                    const gameDescription = link.getAttribute('data-game-description');
-
-
-                    if (!gameId) {
-                         alert("Lỗi: Không lấy được Game ID từ HTML.");
-                         return;
-                    }
-
-                    if(editForm) editForm.reset();
-
-                    if(editGameIdInput) editGameIdInput.value = gameId;
-                    if(editGameNameInput) editGameNameInput.value = gameName !== null ? gameName : '';
-                    if(editGameDescriptionInput) editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
-
-                    showModal(editModal);
+            // Remove sorting indicators from other headers in the same table
+             Array.from(table.getElementsByTagName("th")).forEach(th => {
+                // Check if th is a sortable header before removing classes/attributes
+                if (th.classList.contains('sortable') && th !== header) {
+                     th.classList.remove('asc', 'desc');
+                     th.removeAttribute('data-sort-dir');
                 }
             });
 
-            if(editCloseSpan) editCloseSpan.onclick = function() { hideModal(editModal); }
-            if(editCancelButton) editCancelButton.onclick = function() { hideModal(editModal); }
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.getElementsByTagName("td")[column];
+                const cellB = rowB.getElementsByTagName("td")[column];
+
+                let valueA = cellA ? (cellA.textContent || cellA.innerText).trim() : '';
+                let valueB = cellB ? (cellB.textContent || cellB.innerText).trim() : '';
+
+                let comparison = 0;
+
+                // Handle different data types for sorting
+                switch (type) {
+                    case 'number':
+                        const numA = parseFloat(valueA.replace(/[^0-9.-]/g, '')) || 0; // Strip non-numeric, handle N/A
+                        const numB = parseFloat(valueB.replace(/[^0-9.-]/g, '')) || 0;
+                        comparison = numA - numB;
+                        break;
+                    case 'date':
+                         // Attempt to parse dates robustly (handles YYYY-MM-DD)
+                         const dateA = new Date(valueA);
+                         const dateB = new Date(valueB);
+
+                         // Check for valid Date objects
+                        const isValidDateA = !isNaN(dateA.getTime());
+                        const isValidDateB = !isNaN(dateB.getTime());
+
+                        if (!isValidDateA && !isValidDateB) {
+                            comparison = 0; // Both invalid, treat as equal
+                        } else if (!isValidDateA) {
+                            comparison = 1; // Invalid date A comes after valid date B
+                        } else if (!isValidDateB) {
+                            comparison = -1; // Valid date A comes before invalid date B
+                        } else {
+                             comparison = dateA.getTime() - dateB.getTime();
+                        }
+                        break;
+                    case 'text':
+                    default:
+                        comparison = valueA.localeCompare(valueB);
+                        break;
+                }
+
+
+                // Apply sort direction
+                if (sortDirection === 'desc') {
+                    comparison *= -1;
+                }
+
+                return comparison;
+            });
+
+            // Append sorted rows back to the tbody
+            rows.forEach(row => tbody.appendChild(row));
+
+             // Update sorting indicator on the header
+             header.classList.remove('asc', 'desc');
+             header.classList.add(sortDirection);
+             // Toggle direction for the *next* click on this header
+             header.setAttribute('data-sort-dir', sortDirection === 'asc' ? 'desc' : 'asc');
         }
 
-        // --- JavaScript để Xử lý Form Thêm Mới bằng AJAX ---
-        if(addForm) {
-             addForm.onsubmit = function(event) {
-                 event.preventDefault();
 
-                 var formData = new FormData(addForm);
-
-                 fetch(addForm.action, {
-                     method: 'POST',
-                     body: formData
-                 })
-                 .then(response => {
-                     return response.json().then(data => ({ data, status: response.status, ok: response.ok }));
-                 })
-                 .then(({ data, status, ok }) => {
-                     if (ok) {
-                         alert(data.message || "Thêm game thành công!");
-                         hideModal(addModal);
-                         window.location.reload(); 
-                     } else {
-                         alert("Lỗi: " + (data.error || `Yêu cầu thất bại với trạng thái ${status}`));
-                     }
-                 })
-                 .catch(error => {
-                     console.error('Lỗi Fetch hoặc xử lý Response:', error);
-                     if (error.message.includes('JSON parse error') || error.message.includes('Unexpected token') || error.message.includes('Unexpected non-JSON')) {
-                          alert("Đã xảy ra lỗi bất ngờ. Phản hồi từ máy chủ không phải là định dạng JSON hợp lệ.");
-                     } else {
-                          alert("Đã xảy ra lỗi: " + error.message);
-                     }
-                 });
-             };
-        }
-
-
-        // --- JavaScript để Xử lý Form Sửa Game bằng AJAX ---
-         if(editForm) { 
-             editForm.onsubmit = function(event) {
-                 event.preventDefault();
-
-                 var formData = new FormData(editForm);
-                 // FormData tự động bao gồm input ẩn edit_game_id
-
-                 fetch(editForm.action, { // Action trỏ đến update_game_api
-                     method: 'POST',
-                     body: formData
-                 })
-                 .then(response => {
-                     if (!response.ok) {
-                          // Handle non-JSON errors if necessary
-                          return response.json().then(data => {
-                              throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                          }).catch(() => { // Catch JSON parse error on non-ok response
-                             return response.text().then(text => {
-                                 throw new Error(`Non-JSON error response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                             });
-                         });
-                     }
-                      // Handle potential non-JSON success responses
-                     return response.json().catch(() => { // Catch JSON parse error on ok response
-                          return response.text().then(text => {
-                              throw new Error(`Unexpected non-JSON success response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                          });
-                     });
-                 })
-                 .then(data => {
-                     if (data.success) {
-                         alert(data.message || "Game updated successfully!");
-                         hideModal(editModal);
-                         window.location.reload(); // Tải lại trang để cập nhật danh sách
-                     } else {
-                         alert("Error: " + (data.error || "Failed to update game."));
-                     }
-                 })
-                 .catch(error => {
-                     console.error('Error:', error);
-                     alert("An error occurred while updating the game: " + error.message);
-                 });
-             };
+        // Add click event listeners to sortable headers
+        // Game List Table Headers (Index starts from 0)
+        // Columns: Game ID(0), Game Name(1), Engine(2), Description(3), Publisher(4), Released Date(5), Product ID(6)
+        const gameListHeaders = document.getElementById('gameListTable')?.getElementsByTagName('th');
+         if(gameListHeaders) {
+             gameListHeaders[0]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc'); // Toggle direction before sorting
+                 sortTable('gameListTable', 0, 'text');
+             }); // Game ID (Text)
+             gameListHeaders[1]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('gameListTable', 1, 'text');
+              }); // Game Name (Text)
+             gameListHeaders[2]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('gameListTable', 2, 'text');
+             }); // Engine (Text)
+             // Column 3 is Description, not sortable
+             gameListHeaders[4]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('gameListTable', 4, 'text');
+             }); // Publisher (Text)
+             gameListHeaders[5]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('gameListTable', 5, 'date');
+             }); // Released Date (Date)
+             // Column 6 is Product ID, not sortable
+             // Column 7 is Actions, not sortable
          }
 
 
-        // --- JavaScript để Xử lý Xóa Game bằng AJAX ---
-         if(deleteIcons) { // Chỉ gán nếu các icon tồn tại
-             deleteIcons.forEach(icon => {
+        // --- Add Game Modal ---
+        const addGameBtn = document.getElementById("addGameBtn");
+        const addGameModal = document.getElementById("addGameModal");
+        const addGameCloseSpan = addGameModal ? addGameModal.querySelector(".add-game-close") : null;
+        const addGameCancelButton = addGameModal ? addGameModal.querySelector(".add-game-cancel") : null;
+        const addGameForm = document.getElementById("addGameForm");
+
+        if (addGameBtn && addGameModal && addGameForm) {
+            addGameBtn.onclick = function() {
+                showModal(addGameModal);
+            }
+            if(addGameCloseSpan) addGameCloseSpan.onclick = function() {
+                hideModal(addGameModal);
+            }
+             if(addGameCancelButton) addGameCancelButton.onclick = function() {
+                hideModal(addGameModal);
+            }
+
+            // Close modal when clicking outside of it
+            window.onclick = function(event) {
+                if (event.target == addGameModal) {
+                    hideModal(addGameModal);
+                }
+                 if (event.target == editGameModal) { // Also check for edit modal
+                    hideModal(editGameModal);
+                }
+            }
+
+            // Handle Add Game form submission via AJAX
+            addGameForm.onsubmit = function(event) {
+                event.preventDefault();
+                const formData = new FormData(addGameForm);
+
+                fetch(addGameForm.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // Always attempt to read as JSON, but catch if it fails (e.g., raw text error)
+                    return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                        // If JSON parsing fails, read as text
+                        return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                    });
+                })
+                .then(({ data, status, ok }) => {
+                    if (ok) {
+                        alert(data.message || "Game added successfully!");
+                        hideModal(addGameModal);
+                        window.location.reload(); // Reload the page to see the new game
+                    } else {
+                        alert("Error: " + (data.error || `Request failed with status ${status}`));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred: " + error.message);
+                });
+            };
+        }
+
+
+        // --- Edit Game Modal ---
+        const editGameLinks = document.querySelectorAll(".edit-game-link");
+        const editGameModal = document.getElementById("editGameModal");
+        const editGameCloseSpan = editGameModal ? editGameModal.querySelector(".edit-game-close") : null;
+        const editGameCancelButton = editGameModal ? editGameModal.querySelector(".edit-game-cancel") : null;
+        const editGameForm = document.getElementById("editGameForm");
+        const editGameIdInput = document.getElementById("edit_game_id");
+        const editGameNameInput = document.getElementById("edit_g_name");
+        const editGameDescriptionInput = document.getElementById("edit_g_description");
+
+
+        if(editGameLinks.length > 0 && editGameModal && editGameForm) {
+             editGameLinks.forEach(link => {
+                 link.onclick = function(event) {
+                     event.preventDefault();
+
+                     const gameId = link.getAttribute('data-id');
+                     const gameName = link.getAttribute('data-game-name');
+                     const gameDescription = link.getAttribute('data-game-description');
+
+                     if (!gameId) {
+                         alert("Error: Could not get Game ID from HTML to edit.");
+                         return;
+                     }
+
+                     editGameForm.reset(); // Clear form before populating
+
+                     if(editGameIdInput) editGameIdInput.value = gameId;
+                      // Use !== null to distinguish between null/undefined and empty string
+                     if(editGameNameInput) editGameNameInput.value = gameName !== null ? gameName : '';
+                     if(editGameDescriptionInput) editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
+
+
+                     showModal(editGameModal);
+                 }
+             });
+
+             if(editGameCloseSpan) editGameCloseSpan.onclick = function() {
+                hideModal(editGameModal);
+             }
+             if(editGameCancelButton) editGameCancelButton.onclick = function() {
+                hideModal(editGameModal);
+             }
+
+             // Handle Edit Game form submission via AJAX
+              editGameForm.onsubmit = function(event) {
+                  event.preventDefault();
+                  const formData = new FormData(editGameForm);
+
+                  fetch(editGameForm.action, {
+                      method: 'POST',
+                      body: formData
+                  })
+                  .then(response => {
+                       // Always attempt to read as JSON, but catch if it fails
+                       return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                           return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                       });
+                   })
+                  .then(({ data, status, ok }) => {
+                      if (ok) {
+                          alert(data.message || "Game updated successfully!");
+                          hideModal(editGameModal);
+                          window.location.reload(); // Reload the page to see the updated game
+                      } else {
+                          alert("Error: " + (data.error || `Request failed with status ${status}`));
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Error:', error);
+                       alert("An error occurred: " + error.message);
+                  });
+              };
+        }
+
+
+        // --- Delete Game ---
+         const deleteGameIcons = document.querySelectorAll(".delete-item-icon[data-type='game']");
+
+         if(deleteGameIcons.length > 0) {
+             deleteGameIcons.forEach(icon => {
                  icon.onclick = function(event) {
                      event.preventDefault();
 
-                     const itemId = icon.getAttribute('data-item-id');
+                     const gameId = icon.getAttribute('data-item-id');
 
-                     if (!itemId) {
-                          alert("Lỗi: Không lấy được Game ID để xóa.");
+                     if (!gameId) {
+                          alert("Error: Could not get Game ID from HTML to delete.");
                           return;
                      }
 
-                     if (confirm('Bạn có chắc chắn muốn xóa game này không?')) {
+                     if (confirm(`Are you sure you want to delete game "${gameId}"?`)) {
                          const formData = new FormData();
-                         formData.append('item_id', itemId);
+                         formData.append('item_id', gameId); // API parameter name is item_id
 
-                         fetch("{{ url_for('delete_game_api') }}", { 
+                         fetch("{{ url_for('delete_game_api') }}", {
                              method: 'POST',
                              body: formData
                          })
                          .then(response => {
-                             if (!response.ok) {
-                                 return response.json().then(data => {
-                                     throw new Error(data.error || `HTTP error! Status: ${response.status}`);
-                                 }).catch(() => { 
-                                     return response.text().then(text => {
-                                         throw new Error(`Non-JSON error response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                                     });
-                                 });
-                             }
-                             return response.json().catch(() => { 
-                                  return response.text().then(text => {
-                                      throw new Error(`Unexpected non-JSON success response: ${response.status} ${response.statusText} - ${text.substring(0, 200)}...`);
-                                  });
-                             });
-                         })
-                         .then(data => {
-                             if (data.success) {
+                              // Always attempt to read as JSON, but catch if it fails
+                              return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                                  return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                              });
+                          })
+                         .then(({ data, status, ok }) => {
+                             if (ok) {
                                  alert(data.message || "Game deleted successfully!");
-                                 window.location.reload(); 
+                                 window.location.reload(); // Reload page to reflect deletion
                              } else {
-                                 alert("Error: " + (data.error || "Failed to delete game."));
+                                 alert("Error: " + (data.error || `Request failed with status ${status}`));
                              }
                          })
                          .catch(error => {
@@ -449,6 +486,7 @@
                  }
              });
          }
+
 
     </script>
 

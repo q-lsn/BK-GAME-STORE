@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo & Lọc Dữ Liệu - Hệ Cơ Sở Dữ Liệu Steam</title> {# Updated title #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {# Remove internal style tag #}
+</head>
+<body>
+    <div class="container">
+        <h1>Báo Cáo & Lọc Dữ Liệu</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="report-section"> {# Use report-section class #}
+            <h2>Báo Cáo Game Bán Chạy Nhất</h2>
+            <p class="limitation-note">Tìm game bán chạy nhất dựa trên Tag hoặc Nhà phát hành (tùy chọn).</p> {# Use limitation-note class #}
+
+            <form id="bestSellerForm" action="{{ url_for('reports') }}" method="post">
+                <input type="hidden" name="action" value="call_best_seller">
+
+                <div>
+                    <label for="bs_game_tags">Tag Game (Ví dụ: Action, RPG):</label><br>
+                    {# Preserve input value after POST #}
+                    <input type="text" id="bs_game_tags" name="game_tags" value="{{ best_seller_input.game_tags | default('') }}">
+                </div>
+
+                <div>
+                    <label for="bs_g_publisher">Tên Nhà Phát Hành (Ví dụ: Valve Corporation):</label><br>
+                     {# Preserve input value after POST #}
+                    <input type="text" id="bs_g_publisher" name="g_publisher" value="{{ best_seller_input.g_publisher | default('') }}">
+                </div>
+
+                <button type="submit">Xem Báo Cáo Best Seller</button> {# Use default button style #}
+            </form>
+
+            {% if best_seller_results is not none %}
+                <div class="results-area"> {# Use results-area class #}
+                    <h3>Kết Quả Best Seller:</h3>
+
+                    {# Filter controls for Best Seller table #}
+                    <div class="filter-controls"> {# Use filter-controls class #}
+                         <label for="bestSellerSearch">Tìm kiếm:</label>
+                         <input type="text" id="bestSellerSearch" placeholder="Nhập từ khóa...">
+                    </div>
+
+                     {# Sort controls for Best Seller table #}
+                     <div class="sort-controls"> {# Use sort-controls class #}
+                         <label for="bestSellerSortColumn">Sắp xếp theo:</label>
+                         <select id="bestSellerSortColumn">
+                             {# Options should match table headers that are sortable #}
+                             <option value="-1">-- Chọn cột --</option> {# Default option #}
+                             <option value="0" data-type="text">Game ID</option>
+                             <option value="1" data-type="text">Game Name</option>
+                             <option value="2" data-type="date">Released Date</option>
+                             <option value="3" data-type="text">Publisher Name</option>
+                             <option value="4" data-type="number">Units Sold</option>
+                             <option value="5" data-type="text">Product ID</option>
+                             <option value="6" data-type="number">Price</option>
+                             {# Column 7 (Actions) is not included #}
+                         </select>
+                         <button id="bestSellerSortButton">Sắp xếp</button> {# Use default button style #}
+                     </div>
+
+                    {% if best_seller_results %}
+                        <table class="results-table" id="bestSellerTable"> {# Use results-table class and add ID #}
+                            <thead>
+                                <tr>
+                                    {# Columns from best_seller SP - Add class="sortable" to columns you want to be sortable #}
+                                    <th class="sortable">Game ID</th>
+                                    <th class="sortable">Game Name</th>
+                                    <th class="sortable">Released Date</th>
+                                    <th class="sortable">Publisher Name</th>
+                                    <th class="sortable">Units Sold</th>
+                                    <th class="sortable">Product ID</th>
+                                    <th class="sortable">Price</th>
+                                     <th>Actions</th> {# Actions column is typically not sortable #}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in best_seller_results %}
+                                <tr>
+                                    {# Add data-label for mobile stacking #}
+                                    <td data-label="Game ID">{{ row['game_id'] | default('N/A') }}</td>
+                                    <td data-label="Game Name">{{ row['game_name'] | default('N/A') }}</td>
+                                     {# Format date Released Date #}
+                                    <td data-label="Released Date">
+                                         {% if row['date_released'] %}
+                                             {{ row['date_released'].strftime('%Y-%m-%d') }}
+                                         {% else %}
+                                             N/A
+                                         {% endif %}
+                                     </td>
+                                    <td data-label="Publisher Name">{{ row['PublisherName'] | default('N/A') }}</td>
+                                    <td data-label="Units Sold">{{ row['unit_sold'] | default(0) }}</td>
+                                    <td data-label="Product ID">{{ row['product_id'] | default('N/A') }}</td>
+                                    <td data-label="Price">{{ row['product_price'] | default(0.00) }}</td>
+                                    <td class="actions" data-label="Actions"> {# Add data-label for consistency #}
+                                        {# Link to Edit Game (uses existing game modal) #}
+                                        <a href="#" class="edit-game-link"
+                                           data-id="{{ row['game_id'] | default('') }}"
+                                           data-game-name="{{ row['game_name'] | default('') }}"
+                                           data-game-description="{{ row['game_description'] | default('') }}" {# Assuming description might be useful, though not shown #}
+                                            >Sửa Game</a>
+                                        {# Link to Delete Game (uses existing game delete API) #}
+                                        <span class="delete-item-icon"
+                                              data-type="game"
+                                              data-item-id="{{ row['game_id'] | default('') }}">&times; Xóa Game</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Không tìm thấy game bán chạy nào với tiêu chí này.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="report-section"> {# Use report-section class #}
+            <h2>Lọc Bình Luận Theo Điểm</h2>
+            <p class="limitation-note">Hiển thị bình luận của một game có điểm đánh giá lớn hơn hoặc bằng điểm tối thiểu.</p> {# Use limitation-note class #}
+
+            <form id="commentFilterForm" action="{{ url_for('reports') }}" method="post">
+                 <input type="hidden" name="action" value="call_comment_filter">
+
+                <div>
+                    <label for="cf_game_name">Tên Game (Ví dụ: Dota 2):</label><br>
+                    {# Preserve input value after POST #}
+                    <input type="text" id="cf_game_name" name="game_name" value="{{ comment_filter_input.game_name | default('') }}" required>
+                </div>
+
+                <div>
+                    <label for="cf_minimum_score">Điểm đánh giá tối thiểu (1-10):</label><br>
+                    {# Preserve input value after POST #}
+                    <input type="number" id="cf_minimum_score" name="minimum_score" value="{{ comment_filter_input.minimum_score | default('') }}" min="1" max="10" step="1" required>
+                </div>
+
+                <button type="submit">Lọc Bình Luận</button> {# Use default button style #}
+            </form>
+
+             {% if comment_filter_results is not none %}
+                <div class="results-area"> {# Use results-area class #}
+                    <h3>Kết Quả Lọc Bình Luận:</h3>
+
+                     {# Filter controls for Comment Filter table #}
+                     <div class="filter-controls"> {# Use filter-controls class #}
+                         <label for="commentSearch">Tìm kiếm:</label>
+                         <input type="text" id="commentSearch" placeholder="Nhập từ khóa...">
+                     </div>
+
+                     {# Sort controls for Comment Filter table #}
+                     <div class="sort-controls"> {# Use sort-controls class #}
+                         <label for="commentSortColumn">Sắp xếp theo:</label>
+                         <select id="commentSortColumn">
+                             {# Options should match table headers that are sortable #}
+                             <option value="-1">-- Chọn cột --</option> {# Default option #}
+                             <option value="0" data-type="text">Review ID</option>
+                             <option value="1" data-type="text">User Name</option>
+                             <option value="2" data-type="text">Comment</option>
+                             <option value="3" data-type="number">Rating Score</option>
+                             {# Column 4 (Actions) is not included #}
+                         </select>
+                         <button id="commentSortButton">Sắp xếp</button> {# Use default button style #}
+                     </div>
+
+
+                    {% if comment_filter_results %}
+                        <table class="results-table" id="commentTable"> {# Use results-table class and add ID #}
+                            <thead>
+                                <tr>
+                                    {# Columns from CommentFilter SP - Add class="sortable" to columns you want to be sortable #}
+                                    <th class="sortable">Review ID</th>
+                                    <th class="sortable">User Name</th>
+                                    <th class="sortable">Comment</th>
+                                    <th class="sortable">Rating Score</th>
+                                    <th>Actions</th> {# Actions column is typically not sortable #}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in comment_filter_results %}
+                                <tr>
+                                    {# Add data-label for mobile stacking #}
+                                    <td data-label="Review ID">{{ row['review_id'] | default('N/A') }}</td>
+                                    <td data-label="User Name">{{ row['user_name'] | default('N/A') }}</td>
+                                    <td data-label="Comment">{{ row['comment'] | default('Không có bình luận') }}</td>
+                                    <td data-label="Rating Score">{{ row['rating_score'] | default('N/A') }}</td>
+                                     <td class="actions" data-label="Actions"> {# Add data-label for consistency #}
+                                        {# Link to Edit Comment (uses new comment modal) #}
+                                         <a href="#" class="edit-comment-link"
+                                            data-id="{{ row['review_id'] | default('') }}"
+                                            data-comment="{{ row['comment'] | default('') }}"
+                                            data-rating="{{ row['rating_score'] | default('') }}"
+                                            >Sửa Bình Luận</a>
+                                        {# Link to Delete Comment (uses new comment delete API) #}
+                                         <span class="delete-item-icon"
+                                               data-type="comment"
+                                               data-item-id="{{ row['review_id'] | default('') }}">&times; Xóa Bình Luận</span>
+                                     </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Không tìm thấy bình luận nào với tiêu chí này.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+
+        <div class="back-link-container"> {# Use back-link-container class #}
+            <a href="{{ url_for('index') }}" class="button-link secondary-button">Quay lại Trang Chủ</a> {# Use button-link and secondary style #}
+        </div>
+
+    </div>
+
+    {# --- Modals for Edit Game and Edit Comment --- #}
+
+    {# Modal for Edit Game (Reuse structure from index.html) #}
+     <div id="editGameModal" class="modal"> {# Use modal class #}
+         <div class="modal-content"> {# Use modal-content class #}
+             <span class="close-button edit-game-close">&times;</span> {# Use close-button class #}
+             <h2>Sửa Thông Tin Game</h2>
+             <form id="editGameFormModal" action="{{ url_for('update_game_api') }}" method="post"> {# Use distinct ID #}
+                  <input type="hidden" id="edit_game_id" name="game_id">
+                  <div>
+                     <label for="edit_g_name">Tên Game:</label><br>
+                     <input type="text" id="edit_g_name" name="g_name" required>
+                 </div>
+                 <br>
+                  <div>
+                     <label for="edit_g_description">Mô tả:</label><br>
+                     <textarea id="edit_g_description" name="g_description"></textarea>
+                 </div>
+                 <br>
+                 <button type="submit" class="steam-green">Lưu Thay Đổi</button> {# Use steam-green style #}
+                 <button type="button" class="cancel-button edit-game-cancel">Hủy</button> {# Use cancel-button style #}
+             </form>
+         </div>
+     </div>
+
+    {# Modal for Edit Comment (New modal) #}
+     <div id="editCommentModal" class="modal"> {# Use modal class #}
+         <div class="modal-content"> {# Use modal-content class #}
+             <span class="close-button edit-comment-close">&times;</span> {# Use close-button class #}
+             <h2>Sửa Bình Luận</h2>
+             <form id="editCommentForm" action="{{ url_for('update_comment_api') }}" method="post"> {# New form ID and action #}
+                  <input type="hidden" id="edit_comment_id" name="review_id"> {# Hidden input for Review ID #}
+                  <div>
+                     <label for="edit_comment_text">Nội dung Bình luận:</label><br>
+                     <textarea id="edit_comment_text" name="new_comment"></textarea>
+                 </div>
+                 <br>
+                 <div>
+                     <label for="edit_comment_rating">Điểm đánh giá (1-10):</label><br>
+                     <input type="number" id="edit_comment_rating" name="new_rating" min="1" max="10" step="1">
+                 </div>
+                 <br>
+                 <button type="submit" class="steam-green">Lưu Thay Đổi Bình Luận</button> {# Use steam-green style #}
+                 <button type="button" class="cancel-button edit-comment-cancel">Hủy</button> {# Use cancel-button style #}
+             </form>
+         </div>
+     </div>
+
+
+    <script>
+        // --- Common Modal Functions ---
+        function showModal(modalElement) {
+             if (modalElement) {
+                  modalElement.style.display = "flex"; // Use flex to center content with CSS
+                  // Add class for CSS animation
+                  setTimeout(() => { modalElement.classList.add('is-visible'); }, 10); // Small delay to allow display to change
+              }
+        }
+
+        function hideModal(modalElement) {
+             if (modalElement) {
+                  // Remove class to trigger reverse animation
+                  modalElement.classList.remove('is-visible');
+                   // Hide after animation completes
+                  modalElement.addEventListener('transitionend', function handler() {
+                       modalElement.style.display = "none";
+                       modalElement.removeEventListener('transitionend', handler); // Clean up listener
+                   });
+
+                 const form = modalElement.querySelector('form');
+                 if (form) {
+                      form.reset(); // Reset form inputs when closing
+                 }
+             }
+        }
+
+        // --- Flash Message Fade Out ---
+        window.addEventListener('load', function() {
+            const flashMessages = document.querySelectorAll('.flashes li');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.classList.add('fade-out');
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500); // Match CSS transition speed
+                }, 5000); // Message fades out after 5 seconds
+            });
+        });
+
+        // --- Client-Side Table Filtering ---
+        function filterTable(inputElementId, tableId) {
+            const input = document.getElementById(inputElementId);
+            const table = document.getElementById(tableId);
+            if (!input || !table) return; // Exit if elements not found
+
+            const tbody = table.getElementsByTagName("tbody")[0];
+            const rows = Array.from(tbody.getElementsByTagName("tr")); // Convert HTMLCollection to Array
+
+            input.addEventListener("keyup", function() {
+                const filter = input.value.toLowerCase();
+
+                rows.forEach(row => { // Use forEach on the Array
+                    let rowVisible = false;
+                    const tds = row.getElementsByTagName("td");
+
+                    // Iterate over all cells in the row (except maybe action column if you want to exclude it)
+                    for (let j = 0; j < tds.length; j++) {
+                         // You might want to exclude the last cell (actions) from search
+                         if (tds[j].classList.contains('actions')) continue; // Skip actions column
+
+                        const cell = tds[j];
+                        if (cell) {
+                            const cellText = cell.textContent || cell.innerText;
+                            if (cellText.toLowerCase().indexOf(filter) > -1) {
+                                rowVisible = true;
+                                break; // Found a match in this row, no need to check other cells
+                            }
+                        }
+                    }
+
+                    // Show or hide the row
+                    row.style.display = rowVisible ? "" : "none";
+                });
+            });
+        }
+
+        // Apply filtering to the tables
+        filterTable('bestSellerSearch', 'bestSellerTable');
+        filterTable('commentSearch', 'commentTable');
+
+
+         // --- Client-Side Table Sorting ---
+        function sortTable(tableId, column, type) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            const tbody = table.getElementsByTagName("tbody")[0];
+            const rows = Array.from(tbody.getElementsByTagName("tr")); // Convert HTMLCollection to Array
+
+            const header = table.getElementsByTagName("th")[column];
+            // Get sort direction, defaulting to 'asc' for button sort, or toggling for header click
+            let sortDirection = header.getAttribute('data-sort-dir') || 'asc'; // Default direction
+
+
+            // Remove sorting indicators from other headers in the same table
+             Array.from(table.getElementsByTagName("th")).forEach(th => {
+                // Check if th is a sortable header before removing classes/attributes
+                if (th.classList.contains('sortable') && th !== header) {
+                     th.classList.remove('asc', 'desc');
+                     th.removeAttribute('data-sort-dir');
+                }
+            });
+
+            // Determine the current sort direction based on the header's current state
+             // If this is triggered by a button, it defaults to 'asc' unless header already has a state
+             // If triggered by header click, the handler should toggle the state *before* calling sortTable
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.getElementsByTagName("td")[column];
+                const cellB = rowB.getElementsByTagName("td")[column];
+
+                let valueA = cellA ? (cellA.textContent || cellA.innerText).trim() : '';
+                let valueB = cellB ? (cellB.textContent || cellB.innerText).trim() : '';
+
+                let comparison = 0;
+
+                // Handle different data types for sorting
+                switch (type) {
+                    case 'number':
+                        const numA = parseFloat(valueA.replace(/[^0-9.-]/g, '')) || 0; // Strip non-numeric, handle N/A
+                        const numB = parseFloat(valueB.replace(/[^0-9.-]/g, '')) || 0;
+                        comparison = numA - numB;
+                        break;
+                    case 'date':
+                         // Attempt to parse dates robustly (handles<ctrl97>-MM-DD)
+                         const dateA = new Date(valueA);
+                         const dateB = new Date(valueB);
+
+                         // Check for valid Date objects
+                        const isValidDateA = !isNaN(dateA.getTime());
+                        const isValidDateB = !isNaN(dateB.getTime());
+
+                        if (!isValidDateA && !isValidDateB) {
+                            comparison = 0; // Both invalid, treat as equal
+                        } else if (!isValidDateA) {
+                            comparison = 1; // Invalid date A comes after valid date B
+                        } else if (!isValidDateB) {
+                            comparison = -1; // Valid date A comes before invalid date B
+                        } else {
+                             comparison = dateA.getTime() - dateB.getTime();
+                        }
+                        break;
+                    case 'text':
+                    default:
+                        comparison = valueA.localeCompare(valueB);
+                        break;
+                }
+
+
+                // Apply sort direction
+                if (sortDirection === 'desc') {
+                    comparison *= -1;
+                }
+
+                return comparison;
+            });
+
+            // Append sorted rows back to the tbody
+            rows.forEach(row => tbody.appendChild(row));
+
+             // Update sorting indicator on the header - this logic is primarily for header clicks
+             // For button clicks, we might just set 'asc' and let header click toggle.
+             // Let's simplify: button click defaults to ASC and sets the header state.
+             header.classList.remove('asc', 'desc');
+             header.classList.add('asc'); // Button sort always defaults to ASC
+             header.setAttribute('data-sort-dir', 'desc'); // Next click on header will be DESC
+        }
+
+
+        // Add click event listeners to sortable headers
+        // Best Seller Table Headers (Index starts from 0)
+        // Columns: Game ID(0), Game Name(1), Released Date(2), Publisher Name(3), Units Sold(4), Product ID(5), Price(6)
+        const bestSellerHeaders = document.getElementById('bestSellerTable')?.getElementsByTagName('th');
+         if(bestSellerHeaders) {
+             bestSellerHeaders[0]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc'); // Toggle direction before sorting
+                 sortTable('bestSellerTable', 0, 'text');
+             }); // Game ID (Text)
+             bestSellerHeaders[1]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 1, 'text');
+              }); // Game Name (Text)
+             bestSellerHeaders[2]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 2, 'date');
+             }); // Released Date (Date)
+             bestSellerHeaders[3]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 3, 'text');
+             }); // Publisher Name (Text)
+             bestSellerHeaders[4]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 4, 'number');
+             }); // Units Sold (Number)
+             bestSellerHeaders[5]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 5, 'text');
+             }); // Product ID (Text)
+             bestSellerHeaders[6]?.addEventListener('click', function() {
+                 this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                 sortTable('bestSellerTable', 6, 'number');
+             }); // Price (Number)
+             // Column 7 is Actions, not sortable
+         }
+
+
+        // Comment Table Headers (Index starts from 0)
+        // Columns: Review ID(0), User Name(1), Comment(2), Rating Score(3)
+        const commentHeaders = document.getElementById('commentTable')?.getElementsByTagName('th');
+        if(commentHeaders) {
+            commentHeaders[0]?.addEventListener('click', function() {
+                this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                sortTable('commentTable', 0, 'text');
+            }); // Review ID (Text)
+            commentHeaders[1]?.addEventListener('click', function() {
+                this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                sortTable('commentTable', 1, 'text');
+            }); // User Name (Text)
+            commentHeaders[2]?.addEventListener('click', function() {
+                this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                sortTable('commentTable', 2, 'text');
+            }); // Comment (Text)
+            commentHeaders[3]?.addEventListener('click', function() {
+                this.setAttribute('data-sort-dir', this.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc');
+                sortTable('commentTable', 3, 'number');
+            }); // Rating Score (Number)
+            // Column 4 is Actions, not sortable
+        }
+
+        // --- Sort Button Handlers ---
+         const bestSellerSortButton = document.getElementById('bestSellerSortButton');
+         const bestSellerSortColumnSelect = document.getElementById('bestSellerSortColumn');
+
+         if (bestSellerSortButton && bestSellerSortColumnSelect) {
+             bestSellerSortButton.addEventListener('click', function() {
+                 const selectedOption = bestSellerSortColumnSelect.options[bestSellerSortColumnSelect.selectedIndex];
+                 const columnIndex = parseInt(selectedOption.value, 10);
+                 const dataType = selectedOption.getAttribute('data-type');
+
+                 if (columnIndex !== -1) { // Check if a column is selected
+                     // Find the header element for the selected column
+                     const header = document.getElementById('bestSellerTable')?.getElementsByTagName('th')[columnIndex];
+                     if (header) {
+                          // Reset sort direction for header click toggle logic to work consistently
+                          header.removeAttribute('data-sort-dir');
+                          header.classList.remove('asc', 'desc');
+                     }
+                     sortTable('bestSellerTable', columnIndex, dataType);
+                 } else {
+                     alert('Vui lòng chọn cột để sắp xếp.');
+                 }
+             });
+         }
+
+         const commentSortButton = document.getElementById('commentSortButton');
+         const commentSortColumnSelect = document.getElementById('commentSortColumn');
+
+         if (commentSortButton && commentSortColumnSelect) {
+              commentSortButton.addEventListener('click', function() {
+                 const selectedOption = commentSortColumnSelect.options[commentSortColumnSelect.selectedIndex];
+                 const columnIndex = parseInt(selectedOption.value, 10);
+                 const dataType = selectedOption.getAttribute('data-type');
+
+                 if (columnIndex !== -1) { // Check if a column is selected
+                     // Find the header element for the selected column
+                     const header = document.getElementById('commentTable')?.getElementsByTagName('th')[columnIndex];
+                      if (header) {
+                          // Reset sort direction for header click toggle logic
+                           header.removeAttribute('data-sort-dir');
+                           header.classList.remove('asc', 'desc');
+                      }
+                     sortTable('commentTable', columnIndex, dataType);
+                 } else {
+                     alert('Vui lòng chọn cột để sắp xếp.');
+                 }
+             });
+         }
+
+
+        // --- Best Seller Game Edit/Delete Handlers ---
+        // These links are within the reports.html context, but they interact with game data.
+        // Reusing editGameModal and deleteGameIcons logic from index.html, but scope to reports section
+        const editGameLinks = document.querySelectorAll(".report-section .results-table .actions .edit-game-link"); // Scope to report-section
+        const editGameModal = document.getElementById("editGameModal"); // Defined at the bottom of reports.html
+        // Selectors for modal elements are also defined at the bottom of reports.html
+        const editGameCloseSpan = editGameModal ? editGameModal.querySelector(".edit-game-close") : null;
+        const editGameCancelButton = editGameModal ? editGameModal.querySelector(".edit-game-cancel") : null;
+        const editGameForm = document.getElementById("editGameFormModal"); // Correct form ID at the bottom of reports.html
+        const editGameIdInput = document.getElementById("edit_game_id"); // Input in the modal
+        const editGameNameInput = document.getElementById("edit_g_name"); // Input in the modal
+        const editGameDescriptionInput = document.getElementById("edit_g_description"); // Input in the modal
+
+
+        if(editGameLinks.length > 0 && editGameModal && editGameForm) { // Check if elements exist
+             editGameLinks.forEach(link => {
+                 link.onclick = function(event) {
+                     event.preventDefault();
+
+                     const gameId = link.getAttribute('data-id');
+                     const gameName = link.getAttribute('data-game-name');
+                     const gameDescription = link.getAttribute('data-game-description');
+
+                     if (!gameId) {
+                         alert("Lỗi: Không lấy được Game ID từ HTML để sửa.");
+                         return;
+                     }
+
+                     editGameForm.reset(); // Clear form before populating
+
+                     if(editGameIdInput) editGameIdInput.value = gameId;
+                     // Sử dụng gameName !== null để phân biệt giữa null/undefined và chuỗi rỗng
+                     if(editGameNameInput) editGameNameInput.value = gameName !== null ? gameName : '';
+                     if(editGameDescriptionInput) editGameDescriptionInput.value = gameDescription !== null ? gameDescription : '';
+
+
+                     showModal(editGameModal);
+                 }
+             });
+
+             if(editGameCloseSpan) editGameCloseSpan.onclick = function() { hideModal(editGameModal); }
+             if(editGameCancelButton) editGameCancelButton.onclick = function() { hideModal(editGameModal); }
+
+             // Close modal when clicking outside of it
+             window.onclick = function(event) {
+                 if (event.target == editGameModal) {
+                     hideModal(editGameModal);
+                 }
+                  if (event.target == editCommentModal) { // Also check for edit comment modal
+                     hideModal(editCommentModal);
+                 }
+             }
+
+
+             // Handle Edit Game form submission via AJAX (Same logic as in index.html)
+              editGameForm.onsubmit = function(event) {
+                  event.preventDefault();
+                  const formData = new FormData(editGameForm);
+
+                  fetch(editGameForm.action, {
+                      method: 'POST',
+                      body: formData
+                  })
+                  .then(response => {
+                      return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                           return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                       });
+                  })
+                  .then(({ data, status, ok }) => {
+                      if (ok) {
+                          alert(data.message || "Cập nhật game thành công!");
+                          hideModal(editGameModal);
+                          // Không tải lại trang đầy đủ để giữ lại kết quả báo cáo hiện tại.
+                          // Nếu bạn muốn kết quả báo cáo cập nhật ngay lập tức (dù không thay đổi thứ tự), bạn có thể gọi lại form submit của báo cáo Best Seller ở đây.
+                          // Ví dụ: document.getElementById('bestSellerForm').submit(); // Cần cân nhắc logic này
+                      } else {
+                          alert("Lỗi: " + (data.error || `Yêu cầu thất bại với trạng thái ${status}`));
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Lỗi Fetch hoặc xử lý Response (Edit Game):', error);
+                       if (error.message.includes('JSON parse error') || error.message.includes('Unexpected token') || error.message.includes('Unexpected non-JSON')) {
+                            alert("Đã xảy ra lỗi bất ngờ. Phản hồi từ máy chủ không phải là định dạng JSON hợp lệ.");
+                       } else {
+                            alert("Đã xảy ra lỗi: " + error.message);
+                       }
+                  });
+              };
+        }
+
+
+        // --- Comment Filter Comment Edit/Delete Handlers ---
+        const editCommentLinks = document.querySelectorAll(".report-section .results-table .actions .edit-comment-link"); // Scope to report-section
+        const editCommentModal = document.getElementById("editCommentModal"); // Defined at the bottom of reports.html
+        // Selectors for modal elements are also defined at the bottom of reports.html
+        const editCommentCloseSpan = editCommentModal ? editCommentModal.querySelector(".edit-comment-close") : null;
+        const editCommentCancelButton = editCommentModal ? editCommentModal.querySelector(".edit-comment-cancel") : null;
+        const editCommentForm = document.getElementById("editCommentForm"); // Correct form ID at the bottom of reports.html
+        const editCommentIdInput = document.getElementById("edit_comment_id"); // Input in the modal
+        const editCommentTextInput = document.getElementById("edit_comment_text"); // Input in the modal
+        const editCommentRatingInput = document.getElementById("edit_comment_rating"); // Input in the modal
+
+
+        if(editCommentLinks.length > 0 && editCommentModal && editCommentForm) { // Check if elements exist
+             editCommentLinks.forEach(link => {
+                 link.onclick = function(event) {
+                     event.preventDefault();
+
+                     const reviewId = link.getAttribute('data-id');
+                     const commentText = link.getAttribute('data-comment');
+                     const commentRating = link.getAttribute('data-rating');
+
+                     if (!reviewId) {
+                         alert("Lỗi: Không lấy được Review ID từ HTML để sửa.");
+                         return;
+                     }
+
+                     editCommentForm.reset(); // Clear form before populating
+
+                     if(editCommentIdInput) editCommentIdInput.value = reviewId;
+                     if(editCommentTextInput) editCommentTextInput.value = commentText !== null ? commentText : '';
+                     // Set rating input, handle potential non-numeric data from attribute
+                     if(editCommentRatingInput && commentRating !== null) {
+                         const parsedRating = parseInt(commentRating, 10);
+                         if (!isNaN(parsedRating)) {
+                             editCommentRatingInput.value = parsedRating;
+                         } else {
+                              editCommentRatingInput.value = ''; // Clear if not a valid number
+                         }
+                     } else if (editCommentRatingInput) {
+                          editCommentRatingInput.value = ''; // Clear if attribute is empty or null
+                     }
+
+
+                     showModal(editCommentModal);
+                 }
+             });
+
+            if(editCommentCloseSpan) editCommentCloseSpan.onclick = function() { hideModal(editCommentModal); }
+            if(editCommentCancelButton) editCommentCancelButton.onclick = function() { hideModal(editCommentModal); }
+
+            // Handle Edit Comment form submission via AJAX
+             editCommentForm.onsubmit = function(event) {
+                 event.preventDefault();
+                 const formData = new FormData(editCommentForm);
+
+                 fetch(editCommentForm.action, { // Should point to /api/update_comment
+                     method: 'POST',
+                     body: formData
+                 })
+                 .then(response => {
+                      // Always attempt to read as JSON, but catch if it fails
+                      return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                           return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                       });
+                  })
+                 .then(({ data, status, ok }) => {
+                     if (ok) {
+                         alert(data.message || "Cập nhật bình luận thành công!");
+                         hideModal(editCommentModal);
+                         window.location.reload(); // Reload page to see updated comment list
+                     } else {
+                         alert("Lỗi: " + (data.error || `Yêu cầu thất bại với trạng thái ${status}`));
+                     }
+                 })
+                 .catch(error => {
+                     console.error('Lỗi Fetch hoặc xử lý Response (Edit Comment):', error);
+                      if (error.message.includes('JSON parse error') || error.message.includes('Unexpected token') || error.message.includes('Unexpected non-JSON')) {
+                           alert("Đã xảy ra lỗi bất ngờ. Phản hồi từ máy chủ không phải là định dạng JSON hợp lệ.");
+                      } else {
+                           alert("Đã xảy ra lỗi: " + error.message);
+                      }
+                 });
+             };
+        }
+
+        // --- Generic Delete Handler for Games and Comments ---
+         // Select delete icons in reports section
+         const deleteIcons = document.querySelectorAll(".report-section .results-table .actions .delete-item-icon");
+
+         if(deleteIcons) { // Check if elements exist
+             deleteIcons.forEach(icon => {
+                 icon.onclick = function(event) {
+                     event.preventDefault();
+
+                     const itemType = icon.getAttribute('data-type'); // 'game' or 'comment'
+                     const itemId = icon.getAttribute('data-item-id');
+
+                     if (!itemId || !itemType) {
+                          alert("Lỗi: Không lấy được ID hoặc loại dữ liệu để xóa.");
+                          return;
+                     }
+
+                     const confirmationMessage = itemType === 'game' ?
+                                               `Bạn có chắc chắn muốn xóa game ID "${itemId}" không?` :
+                                               `Bạn có chắc chắn muốn xóa bình luận ID "${itemId}" không?`; // More specific message
+
+                     if (confirm(confirmationMessage)) {
+                         const formData = new FormData();
+                         formData.append('item_id', itemId); // API parameter name
+
+                         let deleteApiUrl = '';
+                         if (itemType === 'game') {
+                              deleteApiUrl = "{{ url_for('delete_game_api') }}"; // Existing game delete API
+                         } else if (itemType === 'comment') {
+                             deleteApiUrl = "{{ url_for('delete_comment_api') }}"; // New comment delete API
+                         } else {
+                             alert("Loại dữ liệu không xác định để xóa.");
+                             return;
+                         }
+
+
+                         fetch(deleteApiUrl, {
+                             method: 'POST',
+                             body: formData
+                         })
+                         .then(response => {
+                              // Always attempt to read as JSON, but catch if it fails
+                              return response.json().then(data => ({ data, status: response.status, ok: response.ok })).catch(() => {
+                                  return response.text().then(text => ({ data: { error: text }, status: response.status, ok: response.ok }));
+                              });
+                          })
+                         .then(({ data, status, ok }) => {
+                             if (ok) {
+                                 alert(data.message || "Xóa thành công!");
+                                 window.location.reload(); // Reload page to reflect deletion
+                             } else {
+                                 alert("Lỗi: " + (data.error || "Xóa thất bại."));
+                             }
+                         })
+                         .catch(error => {
+                             console.error('Lỗi Fetch hoặc xử lý Response (Delete):', error);
+                             alert("Đã xảy ra lỗi khi xóa: " + error.message);
+                         });
+                     }
+                 }
+             });
+         }
+
+        // Close modals if clicking outside them (already handled in index.html script, duplicated here for reports.html)
+         window.addEventListener('click', function(event) {
+             const editGameModal = document.getElementById('editGameModal');
+             const editCommentModal = document.getElementById('editCommentModal');
+             if (editGameModal && event.target === editGameModal) {
+                 hideModal(editGameModal);
+             }
+             if (editCommentModal && event.target === editCommentModal) {
+                 hideModal(editCommentModal);
+             }
+         });
+
+
+    </script>
+
+</body>
+</html>
